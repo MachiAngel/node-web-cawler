@@ -1,0 +1,25 @@
+{
+  "name": "node-web-cawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cawler2.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --timeout 60000 **/*.test.js",
+    "test-watch": "nodemon --exec \"npm test\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "cheerio": "^1.0.0-rc.2",
+    "moment": "^2.19.2",
+    "mongoose": "^4.13.5",
+    "node-schedule": "^1.2.5",
+    "request": "^2.83.0"
+  },
+  "devDependencies": {
+    "expect": "^21.2.1",
+    "mocha": "^4.0.1",
+    "supertest": "^3.0.0"
+  }
+}
