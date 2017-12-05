@@ -1,10 +1,33 @@
 const cheerio = require("cheerio")
 const moment = require("moment")
 const axios = require('axios')
+const phantom = require('phantom')
 // const Bank = require('../model/bank.js')
 // const Rate = require('../model/rate.js')
 const {convertStringToNumberFunction} = require('../util/publicfuction')
 
+
+
+const phantomFunction = async() => {
+    const instance = await phantom.create();
+    const page = await instance.createPage();
+    await page.on('onResourceRequested', function(requestData) {
+        console.info('Requesting', requestData.url);
+    });
+    
+    const status = await page.open('https://stackoverflow.com/');
+    const content = await page.property('content');
+    console.log(content);
+    
+    await instance.exit();
+}
+
+phantomFunction()
+    .then((result) => {
+        console.log(result)
+    }).catch((e) => {
+        console.log(e.message)
+})
 
 const getPage$ = async (url) => {
     try{

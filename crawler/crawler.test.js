@@ -6,7 +6,7 @@ const moment = require("moment")
 const {getBank} = require('../util/util')
 const {getLatestRate} = require('../util/util')
 const SupportCurrency = require('../util/supportCurrency')
-const cralwer = require('./crawler_history_004')
+const cralwer = require('./crawler')
 
 //model
 const Bank = require('../model/bank.js')

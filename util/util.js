@@ -8,7 +8,7 @@ const Rate = require('../model/rate.js')
 
 //util
 const SupportCurrency = require('../util/supportCurrency')
-const cralwer = require('../crawler/crawler_history_004')
+const cralwer = require('../crawler/crawler')
 
 
 //設計為一定有bank回傳 沒有的話就創一個 並回傳

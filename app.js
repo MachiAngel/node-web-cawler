@@ -2,7 +2,7 @@
 const {mongoose} = require('./db/mongoose.js')
 
 const schedule = require('node-schedule')
-const {getHistoryRateFromTaiwanBank} = require('./crawler/crawler_history_004.js')
+const {getHistoryRateFromTaiwanBank} = require('./crawler/crawler.js')
 
 //const {saveTaiwankBankHistory} = require('./util/util')
 const {refreshTaiwanBankData} = require('./util/util')
