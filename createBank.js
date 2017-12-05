@@ -11,8 +11,6 @@ if (process.env.NODE_ENV !== 'test') {
         console.log(`current node env : ${process.env.NODE_ENV}`)
     })
     
-    
-    
     const taiwanBank = new Bank({name:'台灣銀行',code:'004'})
     taiwanBank.save()
         .then((bank) => {

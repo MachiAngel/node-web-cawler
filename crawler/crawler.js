@@ -4,63 +4,121 @@ const axios = require('axios')
 const phantom = require('phantom')
 // const Bank = require('../model/bank.js')
 // const Rate = require('../model/rate.js')
+const supportCurrency = require('../util/supportCurrency')
 const {convertStringToNumberFunction} = require('../util/publicfuction')
 
-
-
-const phantomFunction = async() => {
-    const instance = await phantom.create();
-    const page = await instance.createPage();
-    await page.on('onResourceRequested', function(requestData) {
-        console.info('Requesting', requestData.url);
-    });
-    
-    const status = await page.open('https://stackoverflow.com/');
-    const content = await page.property('content');
-    console.log(content);
-    
-    await instance.exit();
+const lateTime = async (time) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve()
+        },time)
+    })
 }
-
-phantomFunction()
-    .then((result) => {
-        console.log(result)
-    }).catch((e) => {
-        console.log(e.message)
-})
 
 const getPage$ = async (url) => {
     try{
         const response = await axios.get(url)
         const $ = cheerio.load(response.data)
+        // console.log(response.data)
         return $
     }catch (e){
         throw new Error(`can not get $ from ${url}`)
     }
-
 }
 
-//拿到台灣銀行歷史資料，並整理成array
+const getDynamicPage$ = async (url) => {
+    try{
+        //取得instance
+        const instance = await phantom.create()
+        const page = await instance.createPage()
+        //打開網頁
+        const status = await page.open(url)
+        if (status !== 'success') {
+            throw new Error()
+        }
+        //等待3秒 html的js才會加載完畢
+        await lateTime(3000)
+        //獲取網頁
+        const content = await page.property('content')
+        await instance.exit()
+        const $ = cheerio.load(content)
+        return $
+    }catch (e){
+        await instance.exit()
+        throw new Error(`can not get $ from ${url}`)
+    }
+}
+
+
+//017
+const getRealTimeResultFromMegaBank = async () => {
+    const url = `https://wwwfile.megabank.com.tw/rates/M001/viewF.asp`
+    const $ = await getDynamicPage$(url)
+    
+    const dateDateString = $('#dataDate').text().trim()
+    const dateTimeString = $('#dataTime').text().trim()
+    
+    if (dateDateString === '' || dateTimeString === '') {
+        console.log('拿不到兆豐銀行即時時間')
+        return undefined
+    }
+    
+    const timeString = `${dateDateString} ${dateTimeString}`
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    const resultArray = pasreRealTimeRateForMegaBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+
+
+const pasreRealTimeRateForMegaBank = ($, dateObj) => {
+    const resultArray = []
+    
+    const trs = $('#contentTbody').find('tr')
+    console.log(trs.length)
+    trs.each((i,tr) => {
+        const dict = {}
+        dict['bankName'] = '兆豐商銀'
+        dict['bankCode'] = '017'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text()
+        const sliceName = originCurrencyName.substring(originCurrencyName.length-1,originCurrencyName.length-4)
+        if (!supportCurrency.currencyArrayOf017.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[1]).text()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //現金買入
+        const cashBuying = $(tds[2]).text()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[3]).text()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        //現金賣匯
+        const cashSelling = $(tds[4]).text()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    return resultArray
+}
+
+
+
+//拿灣銀行歷史資料 -> 並整理成array
 const getHistoryResultFromTaiwanBank = async (currencyName) => {
     
     const url = `http://rate.bot.com.tw/xrt/quote/l6m/${currencyName}`
     const $ = await getPage$(url)
     const resultArray = pasreHistoryRateForTaiwanBank($, currencyName)
     return resultArray
-    
-    // try {
-    //     const response = await axios.get(url)
-    //     const $ = cheerio.load(response.data)
-    //     const resultArray = pasreHistoryRateForTaiwanBank($, currencyName)
-    //
-    //     if (resultArray.length !== 0) {
-    //         return resultArray
-    //     }else {
-    //         throw  new Error('empty array')
-    //     }
-    // }catch (e) {
-    //     throw new Error('can not parse data from taiwan bank')
-    // }
     
 }
 
@@ -122,7 +180,7 @@ const pasreHistoryRateForTaiwanBank = ($, currencyName) => {
     return resultArray
 }
 
-//返回一個promise array 包含各種幣值的即時報價
+//台灣銀行即時資料 - 返回一個promise array 包含各種幣值的即時報價
 const getRealTimeResultFromTaiwanBank = async () => {
     const url = `http://rate.bot.com.tw/xrt?Lang=zh-TW`
     const $ = await getPage$(url)
@@ -197,12 +255,12 @@ const pasreRealTimeRateForTaiwanBank = ($) => {
 //     console.log(e)
 // })
 
-
+//台灣銀行
 module.exports.getHistoryResultFromTaiwanBank = getHistoryResultFromTaiwanBank
 module.exports.getRealTimeResultFromTaiwanBank = getRealTimeResultFromTaiwanBank
 
-
-
+//兆豐商銀
+module.exports.getRealTimeResultFromMegaBank = getRealTimeResultFromMegaBank
 
 // const rate = new Rate(dict)
 // Bank.findOne({name:'台灣銀行'}).then()
