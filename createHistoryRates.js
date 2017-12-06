@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== 'test') {
     
 }
 
-const saveHistoryRates = async () => {
-    const megaBank = await getBank('兆豐商銀','017')
-    
-}
+// const saveHistoryRates = async () => {
+//     const megaBank = await getBank('兆豐商銀','017')
+//
+// }

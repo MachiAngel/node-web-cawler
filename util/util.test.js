@@ -5,6 +5,7 @@ const moment = require("moment")
 //util
 const {getBank} = require('./util')
 const {getLatestRate} = require('./util')
+const {saveMegaBankHistory} = require('./util')
 const SupportCurrency = require('./supportCurrency')
 const cralwer = require('../crawler/crawler')
 
@@ -15,7 +16,7 @@ const Rate = require('../model/rate.js')
 
 mongoose.Promise = global.Promise
 
-describe('台灣銀行API test',() => {
+describe.skip('台灣銀行API test',() => {
 
     before((done) => {
         mongoose.connect('mongodb://localhost/bank_test',{
@@ -160,6 +161,56 @@ describe('台灣銀行API test',() => {
         done()
     })
 })
+
+
+
+describe('兆豐銀行測試存入db', () => {
+    
+    before((done) => {
+        mongoose.connect('mongodb://localhost/bank_test',{
+            useMongoClient: true
+        })
+        mongoose.connection
+            .once('open', () => {
+                const {banks, rates} = mongoose.connection.collections
+                banks.drop(() => {
+                    rates.drop(() => {
+                        console.log('remove collections')
+                        getBank('兆豐商銀','017')
+                            .then(() => {
+                                done()
+                            })
+                        
+                    })
+                })
+                
+            })
+            .on('error', (error) => {
+                console.log('Warning Error', error);
+            })
+    })
+    
+    it('應該將兆豐銀行歷史資料4600存進資料庫並關連銀行', async () => {
+        await saveMegaBankHistory()
+        const resultArray = await Rate.find({bankName:'兆豐商銀'})
+        expect(resultArray.length).toBe(4600)
+        
+    })
+    
+    // it('應該將兆豐銀行歷史資料4600存進資料庫並關連銀行', async () => {
+    //     await saveMegaBankHistory()
+    //     const resultArray = await Rate.find({bankName:'兆豐商銀'})
+    //     expect(resultArray.length).toBe(4600)
+    //
+    // })
+    
+    after((done) => {
+        mongoose.disconnect()
+        done()
+    })
+    
+})
+
 
 
 
