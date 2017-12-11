@@ -6,6 +6,7 @@ const moment = require("moment")
 const {getBank} = require('./util')
 const {getLatestRate} = require('./util')
 const {saveMegaBankHistory} = require('./util')
+const {refreshEsunBankData} = require('./util')
 const SupportCurrency = require('./supportCurrency')
 const cralwer = require('../crawler/crawler')
 
@@ -164,7 +165,7 @@ describe.skip('台灣銀行API test',() => {
 
 
 
-describe('兆豐銀行測試存入db', () => {
+describe.skip('兆豐銀行測試存入db', () => {
     
     before((done) => {
         mongoose.connect('mongodb://localhost/bank_test',{
@@ -211,6 +212,49 @@ describe('兆豐銀行測試存入db', () => {
     
 })
 
+
+describe.only('玉山銀行測試存入db', () => {
+    
+    before((done) => {
+        mongoose.connect('mongodb://localhost/bank_test',{
+            useMongoClient: true
+        })
+        mongoose.connection
+            .once('open', () => {
+                const {banks, rates} = mongoose.connection.collections
+                banks.drop(() => {
+                    rates.drop(() => {
+                        console.log('remove collections')
+                        getBank('玉山銀行','808')
+                            .then(() => {
+                                done()
+                            })
+                        
+                    })
+                })
+                
+            })
+            .on('error', (error) => {
+                console.log('Warning Error', error);
+            })
+    })
+    
+    it('應該要存入玉山銀行最新16種匯率到db', async () => {
+        
+        await refreshEsunBankData()
+        const esunBank = await Bank.findOne({code:'808'})
+        console.log(esunBank)
+        const latestRatesCount = esunBank.latestRates.length
+        expect(latestRatesCount).toBe(15)
+    
+    })
+    
+    after((done) => {
+        mongoose.disconnect()
+        done()
+    })
+    
+})
 
 
 

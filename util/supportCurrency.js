@@ -43,6 +43,40 @@ const currencyArrayOf017 = [ 'USD',
     'VND',
     'CNY' ]
 
+//玉山銀行
+const currencyArrayOf808 = [ 'USD',
+    'CNY',
+    'HKD',
+    'JPY',
+    'EUR',
+    'AUD',
+    'CAD',
+    'GBP',
+    'ZAR',
+    'NZD',
+    'CHF',
+    'SEK',
+    'SGD',
+    'MXN',
+    'THB' ]
+
+//永豐銀行
+const currencyArrayOf807 = [ 'USD',
+    'JPY',
+    'HKD',
+    'EUR',
+    'GBP',
+    'CHF',
+    'AUD',
+    'SGD',
+    'SEK',
+    'CAD',
+    'THB',
+    'ZAR',
+    'NZD',
+    'MOP',
+    'CNY',
+    'CNH' ]
 
 // const testName = 'USD'
 // if (currencyArrayOf017.includes(testName)){
@@ -53,3 +87,5 @@ const currencyArrayOf017 = [ 'USD',
 
 module.exports.currencyArrayOf004 = currencyArrayOf004
 module.exports.currencyArrayOf017 = currencyArrayOf017
+module.exports.currencyArrayOf808 = currencyArrayOf808
+module.exports.currencyArrayOf807 = currencyArrayOf807

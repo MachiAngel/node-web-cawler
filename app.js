@@ -15,18 +15,35 @@ schedule.scheduleJob('*/3 * * * *', () => {
     console.log('--------開始排程程式碼-----------')
     console.log(new Date())
     
+    //004
     refreshTaiwanBankData()
         .then((result) => {
         console.log(result)
         }).catch((e) => {
         console.log(e)
     })
+    //017
     refreshMegaBankData()
         .then((result) => {
         console.log(result)
         }).catch((e) => {
         console.log(e)
     })
+    //808
+    refreshEsunBankData()
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    //807
+    refreshSinopacBankData()
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
     console.log('--------執行程式碼結束..等待異步-----------')
 })
 

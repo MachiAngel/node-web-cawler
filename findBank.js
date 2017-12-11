@@ -8,7 +8,7 @@ const {getBank} = require('./util/util')
 if (process.env.NODE_ENV !== 'test') {
     mongoose.Promise = global.Promise
    
-   // mongoose.connection.openUri('mongodb://heroku_gsr1gkd1:m8klgb47dr9avug8o6in5g3oo4@ds129946.mlab.com:29946/heroku_gsr1gkd1')
+    //mongoose.connection.openUri('mongodb://heroku_gsr1gkd1:m8klgb47dr9avug8o6in5g3oo4@ds129946.mlab.com:29946/heroku_gsr1gkd1')
     mongoose.connection.openUri('mongodb://localhost/bank')
     const db = mongoose.connection
     db.on('error', console.error.bind(console, '连接错误:'));
@@ -20,11 +20,33 @@ if (process.env.NODE_ENV !== 'test') {
         // }).then((results) => {
         //     console.log(results.length)
         // })
-        
-        
-        getBank('兆豐商銀', '017').then((result) => {
+        // getBank('永豐銀行', '807').then((result) => {
+        //     console.log(result)
+        // })
+    
+        getBank('永豐銀行', '807').then((result) => {
             console.log(result)
         })
+        
+        // Bank.findOneAndRemove({name:'玉山銀行'}).then((result) => {
+        //
+        // })
+        
+        
+        
+        // Rate.findOne({ bankName: '玉山銀行',
+        //     bankCode: '808',
+        //     time: moment("2017-12-11T13:11:00.000"),
+        //     currencyName: 'CHF',
+        //     spotBuying: 30.15,
+        //     spotSelling: 30.35,
+        //     cashBuying: 0,
+        //     cashSelling: 0 }).then((result) => {
+        //     console.log(result)
+        // })
+    
+        
+        
         
         // Bank.findOne({code:'004'})
         //     .populate({

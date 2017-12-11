@@ -52,7 +52,7 @@ const getLatestRate = async (bankCode,currencyName) => {
     
 }
 
-//台灣銀行拿取資料 回傳 promise success
+//004 台灣銀行拿取資料 回傳 promise success
 const refreshTaiwanBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromTaiwanBank()
     if(resultDict === undefined) {
@@ -160,7 +160,6 @@ const saveMegaBankHistory = async () => {
     }
     return 'done'
 }
-
 const refreshMegaBankData = async () => {
     
     const resultDict = await cralwer.getRealTimeResultFromMegaBank()
@@ -198,11 +197,94 @@ const refreshMegaBankData = async () => {
     return 'refresh 017 done'
 }
 
+//808 玉山銀行
+const refreshEsunBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromEsunBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime Esun bank data undefined')
+    }
+    //更新即時資料
+    const esunBank = await Bank.findOneAndUpdate(
+        {code:'808'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(esunBank) {
+        console.log('更新玉山銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到玉山銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = esunBank
+            esunBank.rates.push(latestRate)
+            const savedEsunBank = await esunBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedEsunBank) {
+                console.log('更新玉山銀行-歷史資料成功')
+            }else{
+                console.log('沒有玉山銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    
+    return 'refresh 808 done'
+    
+}
+
+
+//807 永豐銀行
+const refreshSinopacBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromSinopacBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime Esun bank data undefined')
+    }
+    //更新即時資料
+    const sinopacBank = await Bank.findOneAndUpdate(
+        {code:'807'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(sinopacBank) {
+        console.log('更新永豐銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到永豐銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = sinopacBank
+            sinopacBank.rates.push(latestRate)
+            const savedSinopacBank = await sinopacBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedSinopacBank) {
+                console.log('更新永豐銀行-歷史資料成功')
+            }else{
+                console.log('沒有永豐銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    
+    return 'refresh 807 done'
+    
+}
+
+
+
 module.exports = {
     getBank,
     getLatestRate,
     saveTaiwankBankHistory,
     refreshTaiwanBankData,
     saveMegaBankHistory,
-    refreshMegaBankData
+    refreshMegaBankData,
+    refreshEsunBankData,
+    refreshSinopacBankData
 }
