@@ -93,7 +93,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#10 013 國泰世華
-    refreshCathayBankData
+    refreshCathayBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
