@@ -7,6 +7,9 @@ const {getBank} = require('./util')
 const {getLatestRate} = require('./util')
 const {saveMegaBankHistory} = require('./util')
 const {refreshEsunBankData} = require('./util')
+const {refreshLandBankData} = require('./util')
+const {refreshHuaNanBankData} = require('./util')
+
 const SupportCurrency = require('./supportCurrency')
 const cralwer = require('../crawler/crawler')
 
@@ -213,7 +216,7 @@ describe.skip('兆豐銀行測試存入db', () => {
 })
 
 
-describe.only('玉山銀行測試存入db', () => {
+describe.skip('玉山銀行測試存入db', () => {
     
     before((done) => {
         mongoose.connect('mongodb://localhost/bank_test',{
@@ -257,7 +260,92 @@ describe.only('玉山銀行測試存入db', () => {
 })
 
 
+describe.skip('土地銀行測試即時資料存入db', () => {
+    
+    before((done) => {
+        mongoose.connect('mongodb://localhost/bank_test',{
+            useMongoClient: true
+        })
+        mongoose.connection
+            .once('open', () => {
+                const {banks, rates} = mongoose.connection.collections
+                banks.drop(() => {
+                    rates.drop(() => {
+                        console.log('remove collections')
+                        getBank('土地銀行','005')
+                            .then(() => {
+                                done()
+                            })
+                        
+                    })
+                })
+                
+            })
+            .on('error', (error) => {
+                console.log('Warning Error', error);
+            })
+    })
+    
+    it('應該要存入土地銀行最新14種匯率到db', async () => {
+        
+        await refreshLandBankData()
+        const landBank = await Bank.findOne({code:'005'})
+        console.log(landBank)
+        const latestRatesCount = landBank.latestRates.length
+        expect(latestRatesCount).toBe(14)
+        
+    })
+    
+    after((done) => {
+        mongoose.disconnect()
+        done()
+    })
+    
+})
 
+
+describe.skip('華南銀行測試即時資料存入db', () => {
+    
+    before((done) => {
+        mongoose.connect('mongodb://localhost/bank_test',{
+            useMongoClient: true
+        })
+        mongoose.connection
+            .once('open', () => {
+                const {banks, rates} = mongoose.connection.collections
+                banks.drop(() => {
+                    rates.drop(() => {
+                        console.log('remove collections')
+                        getBank('華南銀行','008')
+                            .then(() => {
+                                done()
+                            })
+                        
+                    })
+                })
+                
+            })
+            .on('error', (error) => {
+                console.log('Warning Error', error);
+            })
+    })
+    
+    it('應該要存入華南銀行最新15種匯率到db', async () => {
+        
+        await refreshHuaNanBankData()
+        const landBank = await Bank.findOne({code:'008'})
+        console.log(landBank)
+        const latestRatesCount = landBank.latestRates.length
+        expect(latestRatesCount).toBe(15)
+        
+    })
+    
+    after((done) => {
+        mongoose.disconnect()
+        done()
+    })
+    
+})
 
 
 

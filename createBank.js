@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'test') {
         console.log(`current node env : ${process.env.NODE_ENV}`)
     })
     
-    const taiwanBank = new Bank({name:'台灣銀行',code:'004'})
+    const taiwanBank = new Bank({name:'土地銀行',code:'005'})
     taiwanBank.save()
         .then((bank) => {
             console.log(`success save : ${bank}`)

@@ -271,9 +271,232 @@ const refreshSinopacBankData = async () => {
             }
         }
     }
-    
     return 'refresh 807 done'
+}
+
+
+//005 土地銀行
+const refreshLandBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromLandBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime land bank data undefined')
+    }
+    //更新即時資料
+    const landBank = await Bank.findOneAndUpdate(
+        {code:'005'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
     
+    if(landBank) {
+        console.log('更新永豐銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到土地銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = landBank
+            landBank.rates.push(latestRate)
+            const savedLandBank = await landBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedLandBank) {
+                console.log('更新土地銀行-歷史資料成功')
+            }else{
+                console.log('沒有土地銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    return 'refresh 土地銀行 done'
+}
+
+
+
+//008 華南銀行
+const refreshHuaNanBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromHuaNanBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime HuaNan bank data undefined')
+    }
+    //更新即時資料
+    const huananBank = await Bank.findOneAndUpdate(
+        {code:'008'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(huananBank) {
+        console.log('更新華南銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到華南銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = huananBank
+            huananBank.rates.push(latestRate)
+            const savedHuananBank = await huananBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedHuananBank) {
+                console.log('更新華南銀行-歷史資料成功')
+            }else{
+                console.log('沒有華南銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    return 'refresh 008 done'
+}
+
+//009 彰化銀行
+const refreshChanghuaBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromChanghuaBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime HuaNan bank data undefined')
+    }
+    //更新即時資料
+    const changhuaBank = await Bank.findOneAndUpdate(
+        {code:'009'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(changhuaBank) {
+        console.log('更新彰化銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到彰化銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = changhuaBank
+            changhuaBank.rates.push(latestRate)
+            const savedChanghuaBank = await changhuaBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedChanghuaBank) {
+                console.log('更新彰化銀行-歷史資料成功')
+            }else{
+                console.log('沒有彰化銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    return 'refresh 009 done'
+}
+
+//012 富邦銀行
+const refreshFubonBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromFubonBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime Fubon bank data undefined')
+    }
+    //更新即時資料
+    const fubonBank = await Bank.findOneAndUpdate(
+        {code:'012'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(fubonBank) {
+        console.log('更新富邦銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到富邦銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = fubonBank
+            fubonBank.rates.push(latestRate)
+            const savedFubonBank = await fubonBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedFubonBank) {
+                console.log('更新富邦銀行-歷史資料成功')
+            }else{
+                console.log('沒有富邦銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    return 'refresh 012 done'
+}
+
+//103 新光銀行
+const refreshSkBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromSkBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime Sk bank data undefined')
+    }
+    //更新即時資料
+    const skBank = await Bank.findOneAndUpdate(
+        {code:'103'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(skBank) {
+        console.log('更新新光銀行-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到新光銀行的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = skBank
+            skBank.rates.push(latestRate)
+            const savedSkBank = await skBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedSkBank) {
+                console.log('更新新光銀行-歷史資料成功')
+            }else{
+                console.log('沒有新光銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    return 'refresh 103 done'
+}
+
+//013 國泰世華
+const refreshCathayBankData = async () => {
+    const resultDict = await cralwer.getRealTimeResultFromCathayBank()
+    if(resultDict === undefined) {
+        throw new Error('realtime Cathay bank data undefined')
+    }
+    //更新即時資料
+    const cathayBank = await Bank.findOneAndUpdate(
+        {code:'013'},
+        {latestRates:resultDict.resultArray,currencyUpdateTime:resultDict.resultTime},
+        {new: true})
+    
+    if(cathayBank) {
+        console.log('更新國泰世華-即時匯率成功')
+    }
+    //將每個幣別關連後存到歷史db
+    for (let newRate of resultDict.resultArray) {
+        const findResultRate = await Rate.findOne(newRate)
+        if (findResultRate) {
+            console.log(`有找到國泰世華的${findResultRate.currencyName}歷史資料 不用存`)
+        }else {
+            const latestRate = new Rate(newRate)
+            latestRate.bank = cathayBank
+            cathayBank.rates.push(latestRate)
+            const savedCathayBank = await cathayBank.save()
+            const savedRate = await latestRate.save()
+            // const savedRate = await Rate.create(newRate)
+            if (savedRate && savedCathayBank) {
+                console.log('更新國泰世華銀行-歷史資料成功')
+            }else{
+                console.log('沒有國泰世華銀行資料歷史資料-存入時也失敗')
+            }
+        }
+    }
+    return 'refresh 013 done'
 }
 
 
@@ -286,5 +509,11 @@ module.exports = {
     saveMegaBankHistory,
     refreshMegaBankData,
     refreshEsunBankData,
-    refreshSinopacBankData
+    refreshSinopacBankData,
+    refreshLandBankData,
+    refreshHuaNanBankData,
+    refreshChanghuaBankData,
+    refreshFubonBankData,
+    refreshSkBankData,
+    refreshCathayBankData
 }
