@@ -2,20 +2,42 @@
 //轉換
 const chineseToEnglishDict = {
     '美金':'USD',
+    '美元':'USD',
+    '歐元':'EUR',
     '日圓':'JPY',
+    '日元':'JPY',
     '英鎊':'GBP',
     '港幣':'HKD',
     '澳幣':'AUD',
     '加拿大幣':'CAD',
+    '加幣':'CAD',
     '新加坡幣':'SGD',
     '瑞士法郎':'CHF',
     '瑞典幣':'SEK',
     '南非幣':'ZAR',
     '泰幣':'THB',
     '紐西蘭幣':'NZD',
+    '紐幣':'NZD',
     '歐元':'EUR',
     '人民幣':'CNY'
 }
+
+// const chineseToEnglishDict = {
+//     '美金':'USD',
+//     '日圓':'JPY',
+//     '英鎊':'GBP',
+//     '港幣':'HKD',
+//     '澳幣':'AUD',
+//     '加拿大幣':'CAD',
+//     '新加坡幣':'SGD',
+//     '瑞士法郎':'CHF',
+//     '瑞典幣':'SEK',
+//     '南非幣':'ZAR',
+//     '泰幣':'THB',
+//     '紐西蘭幣':'NZD',
+//     '歐元':'EUR',
+//     '人民幣':'CNY'
+// }
 
 //台灣銀行 004
 const currencyArrayOf004 = ['USD',
@@ -197,6 +219,171 @@ const currencyArrayOf013 = [ 'USD',
     'EUR',
     'TRY' ]
 
+// 021 花旗銀行
+const currencyArrayOf021 = [ 'USD',
+    'GBP',
+    'CHF',
+    'JPY',
+    'AUD',
+    'EUR',
+    'CAD',
+    'HKD',
+    'SGD',
+    'SEK',
+    'NZD',
+    'THB',
+    'ZAR',
+    'CNY' ]
+
+//081 滙豐銀行
+const currencyArrayOf081 = [ 'USD',
+    'EUR',
+    'GBP',
+    'AUD',
+    'NZD',
+    'HKD',
+    'CAD',
+    'SGD',
+    'CHF',
+    'JPY',
+    'SEK',
+    'ZAR',
+    'CNY' ]
+
+//822 中國信託
+const currencyArrayOf822 = [ 'USD',
+    'JPY',
+    'CNY',
+    'HKD',
+    'EUR',
+    'AUD',
+    'GBP',
+    'CAD',
+    'NZD',
+    'ZAR',
+    'SGD',
+    'CHF',
+    'SEK',
+    'THB',
+    'IDR',
+    'INR',
+    'MYR',
+    'PHP',
+    'VND',
+    'KRW' ]
+
+//816 安泰銀行
+const currencyArrayOf816 = [ 'USD',
+    'JPY',
+    'HKD',
+    'EUR',
+    'CNY',
+    'AUD',
+    'CAD',
+    'CHF',
+    'GBP',
+    'NZD',
+    'SEK',
+    'SGD',
+    'ZAR' ]
+
+//815 日盛銀行
+const currencyArrayOf815 = [ 'USD',
+    'EUR',
+    'HKD',
+    'GBP',
+    'JPY',
+    'AUD',
+    'CAD',
+    'SGD',
+    'CHF',
+    'NZD',
+    'SEK',
+    'ZAR',
+    'CNY' ]
+
+
+//814 大眾銀行
+const currencyArrayOf814 = [ 'USD',
+    'JPY',
+    'HKD',
+    'EUR',
+    'CNY',
+    'AUD',
+    'CAD',
+    'CHF',
+    'GBP',
+    'MYR',
+    'NZD',
+    'SEK',
+    'SGD',
+    'THB',
+    'ZAR' ]
+
+
+
+const currencyArrayOf812 = [ 'AUD',
+    'CAD',
+    'CHF',
+    'CNY',
+    'EUR',
+    'GBP',
+    'HKD',
+    'JPY',
+    'NZD',
+    'SEK',
+    'SGD',
+    'THB',
+    'USD',
+    'ZAR' ]
+
+const currencyArrayOf810 = [ 'USD',
+    'HKD',
+    'GBP',
+    'AUD',
+    'CAD',
+    'SGD',
+    'CHF',
+    'JPY',
+    'THB',
+    'NZD',
+    'CNY',
+    'EUR',
+    'SEK' ]
+
+
+const currencyArrayOf809 = [ 'USD',
+    'HKD',
+    'JPY',
+    'EUR',
+    'GBP',
+    'AUD',
+    'CAD',
+    'CHF',
+    'NZD',
+    'SEK',
+    'SGD',
+    'CNH',
+    'THB',
+    'ZAR' ]
+
+
+const currencyArrayOf806 = [ 'USD',
+    'CNY',
+    'JPY',
+    'EUR',
+    'HKD',
+    'AUD',
+    'NZD',
+    'ZAR',
+    'CAD',
+    'GBP',
+    'SGD',
+    'CHF',
+    'SEK',
+    'THB' ]
+
+
 // const testName = 'USD'
 // if (currencyArrayOf017.includes(testName)){
 //     console.log('yes')
@@ -214,6 +401,16 @@ module.exports.currencyArrayOf009 = currencyArrayOf009
 module.exports.currencyArrayOf012 = currencyArrayOf012
 module.exports.currencyArrayOf103 = currencyArrayOf103
 module.exports.currencyArrayOf013 = currencyArrayOf013
+module.exports.currencyArrayOf021 = currencyArrayOf021
+module.exports.currencyArrayOf081 = currencyArrayOf081
+module.exports.currencyArrayOf822 = currencyArrayOf822
+module.exports.currencyArrayOf816 = currencyArrayOf816
+module.exports.currencyArrayOf815 = currencyArrayOf815
+module.exports.currencyArrayOf814 = currencyArrayOf814
+module.exports.currencyArrayOf812 = currencyArrayOf812
+module.exports.currencyArrayOf810 = currencyArrayOf810
+module.exports.currencyArrayOf809 = currencyArrayOf809
+module.exports.currencyArrayOf806 = currencyArrayOf806
 
 
 module.exports.chineseToEnglishDict = chineseToEnglishDict

@@ -2,8 +2,28 @@
 const {mongoose} = require('./db/mongoose.js')
 
 const schedule = require('node-schedule')
+//const {getHistoryRateFromTaiwanBank} = require('./crawler/crawler.js')
 
-const {refreshBankDataFor} = require('./util/util')
+//const {saveTaiwankBankHistory} = require('./util/util')
+const {refreshTaiwanBankData} = require('./util/util')
+const {refreshMegaBankData} = require('./util/util')
+const {refreshEsunBankData} = require('./util/util')
+const {refreshSinopacBankData} = require('./util/util')
+const {refreshLandBankData} = require('./util/util')
+const {refreshHuaNanBankData} = require('./util/util')
+const {refreshChanghuaBankData} = require('./util/util')
+const {refreshFubonBankData} = require('./util/util')
+const {refreshSkBankData} = require('./util/util')
+const {refreshCathayBankData} = require('./util/util')
+const {refreshCitiBankData} = require('./util/util')
+const {refreshHSBankData} = require('./util/util')
+const {refreshCTBCBankData} = require('./util/util')
+const {refreshEntieBankData} = require('./util/util')
+const {refreshJihSunBankData} = require('./util/util')
+const {refreshTCBankData} = require('./util/util')
+const {refreshTaishinBankData} = require('./util/util')
+const {refreshDBSBankData} = require('./util/util')
+const {refreshKgiBankData} = require('./util/util')
 
 
 // const rule = new schedule.RecurrenceRule()
@@ -14,28 +34,28 @@ schedule.scheduleJob('*/3 * * * *', () => {
     console.log(new Date())
     
     //#1 004 台灣銀行
-    refreshBankDataFor('004')
+    refreshTaiwanBankData()
         .then((result) => {
-        console.log(result)
+            console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#2 017 兆豐商銀
-    refreshBankDataFor('017')
+    refreshMegaBankData()
         .then((result) => {
-        console.log(result)
+            console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#3 808 玉山銀行
-    refreshBankDataFor('808')
+    refreshEsunBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#4 807 永豐銀行
-    refreshBankDataFor('807')
+    refreshSinopacBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -43,7 +63,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#5 005 土地銀行
-    refreshBankDataFor('005')
+    refreshLandBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -51,14 +71,14 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#6 008 華南銀行
-    refreshBankDataFor('008')
+    refreshHuaNanBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#7 009 彰化銀行
-    refreshBankDataFor('009')
+    refreshChanghuaBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -66,7 +86,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#8 012 富邦銀行
-    refreshBankDataFor('012')
+    refreshFubonBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -74,7 +94,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#9 103 新光銀行
-    refreshBankDataFor('103')
+    refreshSkBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -82,7 +102,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#10 013 國泰世華
-    refreshBankDataFor('013')
+    refreshCathayBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -90,7 +110,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#11 021 花旗銀行
-    refreshBankDataFor('021')
+    refreshCitiBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -98,7 +118,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#12 081 滙豐銀行
-    refreshBankDataFor('081')
+    refreshHSBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -106,7 +126,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#13 822 中國信託
-    refreshBankDataFor('822')
+    refreshCTBCBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -114,7 +134,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#14 816 安泰銀行
-    refreshBankDataFor('816')
+    refreshEntieBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -122,14 +142,14 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#15 815 日盛銀行
-    refreshBankDataFor('815')
+    refreshJihSunBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#16 814 大眾銀行
-    refreshBankDataFor('814')
+    refreshTCBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
@@ -137,33 +157,27 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#17 812 台新銀行
-    refreshBankDataFor('812')
+    refreshTaishinBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#18 810 星展銀行
-    refreshBankDataFor('810')
+    refreshDBSBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
         console.log(e)
     })
     //#19 809 凱基銀行
-    refreshBankDataFor('809')
+    refreshKgiBankData()
         .then((result) => {
             console.log(result)
         }).catch((e) => {
         console.log(e)
     })
-    //#20 806 元大銀行
-    refreshBankDataFor('806')
-        .then((result) => {
-            console.log(result)
-        }).catch((e) => {
-        console.log(e)
-    })
+    
     console.log('--------執行程式碼結束..等待異步-----------')
 })
 
