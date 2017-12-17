@@ -916,7 +916,7 @@ const bankInfoDict = {
     '004':{
         bankName:'台灣銀行',
         bankCode:'004',
-        bankCawler:cralwer.getHistoryResultFromTaiwanBank
+        bankCawler:cralwer.getRealTimeResultFromTaiwanBank
     },
     '017':{
         bankName:'兆豐商銀',
