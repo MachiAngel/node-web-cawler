@@ -8,7 +8,7 @@ const check = (arr) => {
     console.log([...new Set(arr)].length == 1 ? true : false)
 }
 
-describe.skip('即時匯率API Test',() => {
+describe('即時匯率API Test',() => {
     
     //#1 台灣銀行
     it('會下載台灣銀行最新匯率19種幣別資料', async () => {
@@ -276,6 +276,151 @@ describe.skip('即時匯率API Test',() => {
         })
         
         expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    
+    //#21 遠東銀行
+    it('會下載遠東銀行最新匯率13種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromFarEastBank()
+        expect(resultDict.resultArray.length).toBe(13)
+        
+        //提供現金買賣 幣別資料應該要有5個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashBuying !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    
+    //#22 聯邦銀行
+    it('會下載聯邦銀行最新匯率12種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromUBOTBank()
+        expect(resultDict.resultArray.length).toBe(12)
+        
+        //提供現金買賣 幣別資料應該要有5個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashBuying !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    //#23 三信銀行
+    it('會下載三信銀行最新匯率11種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromCotaBank()
+        expect(resultDict.resultArray.length).toBe(11)
+        
+        //提供現金買賣 幣別資料應該要有5個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashBuying !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    
+    //#24 板信銀行
+    it('會下載板信銀行最新匯率12種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromBOPBank()
+        expect(resultDict.resultArray.length).toBe(12)
+        
+        //提供現金買賣 幣別資料應該要有5個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashBuying !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    
+    //#25 陽信銀行
+    it('會下載陽信銀行最新匯率13種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromSunnyBank()
+        expect(resultDict.resultArray.length).toBe(13)
+        
+        //提供現金買賣 幣別資料應該要有5個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashBuying !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    
+    //#26 台中銀行
+    it('會下載台中銀行最新匯率13種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromTaichungBank()
+        expect(resultDict.resultArray.length).toBe(13)
+        
+        //提供現金買賣 幣別資料應該要有6個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashBuying !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(7)
+    })
+    
+    //#27 台灣企銀
+    it('會下載台灣企銀最新匯率14種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromTbbBank()
+        expect(resultDict.resultArray.length).toBe(14)
+        
+        //提供現金買賣 幣別資料應該要有6個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashSelling !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(5)
+    })
+    
+    //#28 高雄銀行
+    it('會下載高雄銀行最新匯率14種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromKaoHsiungBank()
+        expect(resultDict.resultArray.length).toBe(14)
+        
+        //提供現金買賣 幣別資料應該要有6個
+        const filtedArrayOfHaveCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashSelling !== 0)
+        })
+        expect(filtedArrayOfHaveCashTrade.length).toBe(10)
+        
+        //提供即期買賣 幣別應該會少韓國幣
+        const filtedArrayOfHaveSpotTrade = resultDict.resultArray.filter((result) => {
+            return (result.spotBuying !== 0 && result.spotSelling !== 0)
+        })
+        expect(filtedArrayOfHaveSpotTrade.length).toBe(13)
+        
+    })
+    
+    //#29 渣打銀行
+    it('會下載渣打銀行最新匯率14種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromCharterBank()
+        expect(resultDict.resultArray.length).toBe(14)
+        
+        //提供現金買賣 幣別資料應該要有7個
+        const filtedArrayOfHaveNotCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashSelling !== 0)
+        })
+        
+        expect(filtedArrayOfHaveNotCashTrade.length).toBe(7)
+    })
+    
+    //#30 第一銀行
+    it.only('會下載第一銀行最新匯率15種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromFirstBank()
+        expect(resultDict.resultArray.length).toBe(15)
+        
+        //提供現金買賣 幣別資料應該要有7個
+        const filtedArrayOfHaveCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashSelling !== 0)
+        })
+        
+        expect(filtedArrayOfHaveCashTrade.length).toBe(8)
     })
     
 })

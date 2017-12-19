@@ -4,11 +4,12 @@ const axios = require('axios')
 const phantom = require('phantom')
 const request = require('request')
 const iconv = require('iconv-lite')
-
+// require('ssl-root-cas').inject()
 // const Bank = require('../model/bank.js')
 // const Rate = require('../model/rate.js')
 const supportCurrency = require('../util/supportCurrency')
 const {convertStringToNumberFunction} = require('../util/publicfuction')
+
 
 function waitUntil(asyncTest) {
     return new Promise(function(resolve, reject) {
@@ -84,7 +85,7 @@ const getPageTest$ = async (url) => {
     }
 }
 
-//for 008華南  816安泰
+//for 008華南  816安泰  803聯邦 108陽信銀行 052 渣打銀行
 const getBig5Page$ = async (url) => {
     try{
         const response = await axios.get(url,{ responseType: 'arraybuffer' })
@@ -99,11 +100,19 @@ const getBig5Page$ = async (url) => {
 }
 
 const getDynamicPage$ = async (url) => {
+    //取得instance
+    const instance = await phantom.create()
     try{
-        //取得instance
-        const instance = await phantom.create()
         const page = await instance.createPage()
         //page.viewportSize = { width: 1920, height: 1080 }
+        //page.setting('resourceTimeout',40000)
+        // await page.on('onResourceRequested', true,function(requestData, networkRequest) {
+        //     console.info('Requesting', requestData.url);
+        //     if (requestData.url === 'https://ipost.post.gov.tw/pst/home.html') {
+        //         networkRequest.abort()
+        //         console.log('有近來')
+        //     }
+        // })
         //打開網頁
         const status = await page.open(url)
         if (status !== 'success') {
@@ -113,7 +122,7 @@ const getDynamicPage$ = async (url) => {
         await lateTime(3000)
         //獲取網頁
         const content = await page.property('content')
-        // console.log(content)
+        //console.log(content)
         //page.render('bank.jpeg', {format: 'jpeg', quality: '100'})//
         await instance.exit()
         const $ = cheerio.load(content)
@@ -159,6 +168,739 @@ const getDynamicPageForFristBank$ = async (url) => {
 }
 
 
+
+//007 第一銀行即時資料 - get data
+const getRealTimeResultFromFirstBank = async () => {
+    const url = `https://ibank.firstbank.com.tw/NetBank/7/0201.html?sh=none`
+    const $ = await getPage$(url)
+    const timeString = $('.locator2').text().trim()
+    if (timeString === '') {
+        console.log('拿不到第一銀行即時時間')
+        return undefined
+    }
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    const resultArray = parseRealTimeRateForFirstBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//007 第一銀行即時資料 - parse html
+const parseRealTimeRateForFirstBank = ($, dateObj) => {
+    const trs = $('#table1').find('tr')
+    
+    const firstBankDict = {}
+    
+    trs.each((i,tr) => {
+        if( i === 0 || i === 24) {
+            return
+        }
+        
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        let sliceName = originCurrencyName.substring(originCurrencyName.length-1,originCurrencyName.length-4)
+        if (sliceName === 'CN') {
+            sliceName = 'CNY'
+        }
+        const type = $(tds[1]).text().trim()
+        // console.log(type)
+        if (type === 'Spot') {
+            const currencyDict = firstBankDict[sliceName]
+            if (currencyDict === undefined) {
+
+                const newDict = {
+                    bankName:'第一銀行',
+                    bankCode:'007',
+                    time:dateObj,
+                    currencyName:sliceName,
+                    spotBuying:convertStringToNumberFunction($(tds[2]).text().trim()),
+                    spotSelling:convertStringToNumberFunction($(tds[3]).text().trim()),
+                    cashBuying:0,
+                    cashSelling:0
+                }
+                firstBankDict[sliceName] = newDict
+
+            } else {
+                currencyDict['spotBuying'] = convertStringToNumberFunction($(tds[2]).text().trim())
+                currencyDict['spotSelling'] = convertStringToNumberFunction($(tds[3]).text().trim())
+            }
+
+        }else if (type === 'Cash') {
+            const currencyDict = firstBankDict[sliceName]
+            if (currencyDict === undefined) {
+
+                const newDict = {
+                    bankName:'第一銀行',
+                    bankCode:'007',
+                    time:dateObj,
+                    currencyName:sliceName,
+                    spotBuying:0,
+                    spotSelling:0,
+                    cashBuying:convertStringToNumberFunction($(tds[2]).text().trim()),
+                    cashSelling:convertStringToNumberFunction($(tds[3]).text().trim())
+                }
+                firstBankDict[sliceName] = newDict
+
+            } else {
+                currencyDict['cashBuying'] = convertStringToNumberFunction($(tds[2]).text().trim())
+                currencyDict['cashSelling'] = convertStringToNumberFunction($(tds[3]).text().trim())
+            }
+        }else {
+            return
+        }
+        
+    })
+    const resultArray = Object.values(firstBankDict)
+    if (resultArray.length != supportCurrency.currencyArrayOf007.length) {
+        return []
+    }
+    return resultArray
+}
+
+//052 渣打銀行即時資料 - get data
+const getRealTimeResultFromCharterBank = async () => {
+    const url = `http://www.standardchartered.com.tw/check/inquiry-rate-foreign-exchange.asp`
+    const $ = await getBig5Page$(url)
+    const timeString = $('#dotline').next().text().trim()
+    
+    if (timeString === '') {
+        console.log('拿不到渣打銀行即時時間')
+        return undefined
+    }
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    
+    const resultArray = parseRealTimeRateForCharterBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+
+//052 渣打銀行即時資料 - parse html
+const parseRealTimeRateForCharterBank = ($, dateObj) => {
+    const trs = $('#innertable').find('tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        if (i === 0) return
+        const dict = {}
+        dict['bankName'] = '渣打銀行'
+        dict['bankCode'] = '052'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tr).find('th').text().trim()
+        const sliceName = originCurrencyName.substring(originCurrencyName.length-1,originCurrencyName.length-4)
+        if (!supportCurrency.currencyArrayOf052.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[2]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[3]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[0]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[1]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+    
+        resultArray.push(dict)
+    })
+    // console.log(resultArray)
+    if (resultArray.length != supportCurrency.currencyArrayOf052.length) {
+        return []
+    }
+    return resultArray
+}
+
+
+
+//016 高雄銀行即時資料 - get data
+const getRealTimeResultFromKaoHsiungBank = async () => {
+    const url = `https://ibank.bok.com.tw/PIB/ca/ca02102/CA02102_HOME.xhtml`
+    const $ = await getPage$(url)
+    const timeString = $('.tb_date').text().trim()
+    if (timeString === '') {
+        console.log('拿不到高雄銀行即時時間')
+        return undefined
+    }
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    const resultArray = parseRealTimeRateForKaoHsisungBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//016 高雄銀行即時資料 - parse html
+const parseRealTimeRateForKaoHsisungBank = ($, dateObj) => {
+    const trs = $('.tb_mul').find('tbody tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        const dict = {}
+        dict['bankName'] = '高雄銀行'
+        dict['bankCode'] = '016'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const sliceName = originCurrencyName.substring(0,3)
+        
+        if (!supportCurrency.currencyArrayOf016.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[1]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[2]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[3]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[4]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    if (resultArray.length != supportCurrency.currencyArrayOf016.length) {
+        return []
+    }
+    return resultArray
+}
+
+//050 台灣企銀 - 民國轉西元
+const parseTbbBankDate = (str) => {
+    const indexKey = str.indexOf('掛')
+    const sliceString = str.slice(indexKey+5,str.length)
+    
+    const yearString = sliceString.substr(0,3)
+    const yearNumber = convertStringToNumberFunction(yearString)
+    if (yearNumber === 0) {
+        return ''
+    }
+    const replaceString = sliceString.replace(yearString, `${yearNumber + 1911}`)
+    return replaceString
+}
+//050 台灣企銀即時資料 - get data
+const getRealTimeResultFromTbbBank = async () => {
+    const url = `http://rate.tbb.com.tw/N030.jsp`
+    const $ = await getPage$(url)
+    const originalString = $('.dateinfo').text().trim()
+    const timeString = parseTbbBankDate(originalString)
+    console.log(timeString)
+    if (timeString === '') {
+        console.log('拿不到台灣企銀即時時間')
+        return undefined
+    }
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    console.log(dateObj)
+    
+    const resultArray = parseRealTimeRateForTbbBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//050 台灣企銀即時資料 - parse html
+const parseRealTimeRateForTbbBank = ($, dateObj) => {
+    const trs = $('table tbody tr')
+    const tbbDict = {}
+    trs.each((i,tr) => {
+        if( i === 25 ) {
+            return
+        }
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const englishName = supportCurrency.chineseToEnglishDict[originCurrencyName]
+        const type = $(tds[1]).text().trim()
+        
+        if (type === '即期') {
+           const currencyDict = tbbDict[englishName]
+            if (currencyDict === undefined) {
+               
+               const newDict = {
+                   bankName:'台灣企銀',
+                   bankCode:'050',
+                   time:dateObj,
+                   currencyName:englishName,
+                   spotBuying:convertStringToNumberFunction($(tds[2]).text().trim()),
+                   spotSelling:convertStringToNumberFunction($(tds[3]).text().trim()),
+                   cashBuying:0,
+                   cashSelling:0
+               }
+               tbbDict[englishName] = newDict
+               
+            } else {
+                currencyDict['spotBuying'] = convertStringToNumberFunction($(tds[2]).text().trim())
+                currencyDict['spotSelling'] = convertStringToNumberFunction($(tds[3]).text().trim())
+            }
+            
+        }else if (type === '現金') {
+            const currencyDict = tbbDict[englishName]
+            if (currencyDict === undefined) {
+        
+                const newDict = {
+                    bankName:'台灣企銀',
+                    bankCode:'050',
+                    time:dateObj,
+                    currencyName:englishName,
+                    spotBuying:0,
+                    spotSelling:0,
+                    cashBuying:convertStringToNumberFunction($(tds[2]).text().trim()),
+                    cashSelling:convertStringToNumberFunction($(tds[3]).text().trim())
+                }
+                tbbDict[englishName] = newDict
+        
+            } else {
+                currencyDict['cashBuying'] = convertStringToNumberFunction($(tds[2]).text().trim())
+                currencyDict['cashSelling'] = convertStringToNumberFunction($(tds[3]).text().trim())
+            }
+        }else {
+            return
+        }
+        
+    })
+    const resultArray = Object.values(tbbDict)
+    
+    if (resultArray.length != supportCurrency.currencyArrayOf050.length) {
+        return []
+    }
+    return resultArray
+}
+
+
+//053 台中銀行即時資料 - get data
+const getRealTimeResultFromTaichungBank = async () => {
+    const url = `https://ibank.tcbbank.com.tw/PIB/cb5/cb501005/CB501005_01.faces`
+    const $ = await getDynamicPage$(url)
+    
+    const dateObj = moment()
+    const resultArray = parseRealTimeRateForTaiChungBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//053 台中銀行即時資料 - parse html
+const parseRealTimeRateForTaiChungBank = ($, dateObj) => {
+    const trs = $('.tb2').find('tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        if( i === 0 ) {
+            return
+        }
+        const dict = {}
+        dict['bankName'] = '台中銀行'
+        dict['bankCode'] = '053'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const sliceName = originCurrencyName.substring(originCurrencyName.length,originCurrencyName.length-3)
+        
+        if (!supportCurrency.currencyArrayOf053.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[3]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[4]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[1]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[2]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    // console.log(resultArray)
+    if (resultArray.length != supportCurrency.currencyArrayOf053.length) {
+        return []
+    }
+    return resultArray
+}
+
+//108 陽信銀行即時資料 - get data
+const getRealTimeResultFromSunnyBank = async () => {
+    const url = `https://www.sunnybank.com.tw/webaccess/Frn2.asp`
+    const $ = await getBig5Page$(url)
+    
+    const timeString = $('.contents_inquiry').find('td').text().trim()
+    if (timeString === '') {
+        console.log('拿不到星展銀行即時時間')
+        return undefined
+    }
+    const dateObj = moment(timeString, 'YYYY-MM-DD h:mm')
+    const resultArray = parseRealTimeRateForSunnyBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//108 陽信銀行即時資料 - parse html
+const parseRealTimeRateForSunnyBank = ($, dateObj) => {
+    const trs = $(`.enquiry_screen`).find('tbody tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        const dict = {}
+        dict['bankName'] = '陽信銀行'
+        dict['bankCode'] = '108'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const englishName = supportCurrency.chineseToEnglishDict[originCurrencyName]
+        
+        if (!supportCurrency.currencyArrayOf108.includes(englishName)) {
+            return
+        }
+        dict['currencyName'] = englishName
+        //即期買入
+        const spotBuying = $(tds[3]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[4]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[1]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[2]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    
+    if (resultArray.length != supportCurrency.currencyArrayOf108.length) {
+        return []
+    }
+    return resultArray
+}
+
+
+//118 板信銀行 - 民國轉西元
+const parseBOPBankDate = (str) => {
+    
+    const yearNumber = convertStringToNumberFunction(str)
+    if (yearNumber === 0) {
+        return ''
+    }
+    const replaceString = `${yearNumber + 1911}`
+    return replaceString
+}
+//118 板信銀行即時資料 - get data
+const getRealTimeResultFromBOPBank = async () => {
+    const url = `http://www.bop.com.tw/bankinfo/BS1003.aspx`
+    const $ = await getPage$(url)
+    
+    const yearString = $('#lblFxRateYear').text().trim()
+    const modifyYearString = parseBOPBankDate(yearString)
+    if(modifyYearString === '') {
+        console.log('板信銀行pasre年份出錯')
+        return undefined
+    }
+    const monthString = $('#lblFxRateMonth').text().trim()
+    const dayString = $('#lblFxRateDay').text().trim()
+    const hourString = $('#lblFxRateTime').text().trim()
+    const timeString = `${modifyYearString}/${monthString}/${dayString} ${hourString}`
+    //console.log(timeString)
+    
+    if (timeString === '') {
+        console.log('拿不到板信銀行即時時間')
+        return undefined
+    }
+    //const dateObj = moment(timeString, 'YYYY年MM月DD日 h:mm')
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    // console.log(dateObj)
+    
+    const resultArray = parseRealTimeRateForBOPBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//118 板信銀行即時資料 - parse html
+const parseRealTimeRateForBOPBank = ($, dateObj) => {
+    
+    const trs = $('#gvFxRate').find('tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        if( i === 0) {
+            return
+        }
+        const dict = {}
+        dict['bankName'] = '板信銀行'
+        dict['bankCode'] = '118'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const englishName = supportCurrency.chineseToEnglishDict[originCurrencyName]
+        if (!supportCurrency.currencyArrayOf118.includes(englishName)) {
+            return
+        }
+        dict['currencyName'] = englishName
+        //即期買入
+        const spotBuying = $(tds[1]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[2]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[3]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[4]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    //console.log(resultArray)
+    if (resultArray.length != supportCurrency.currencyArrayOf118.length) {
+        return []
+    }
+    return resultArray
+}
+
+
+//147 三信銀行 - 除去不必要文字 and 民國轉西元
+const parseCotaBankDate = (str) => {
+    //不包含 查詢日期： 查詢時間： 直接treturn
+    if (!(str.includes('■ 牌告日期：') && str.includes('時間：'))) {
+        return ''
+    }
+    const replaceString = str.replace('■ 牌告日期：', '').replace('時間：', '')
+    const yearString = replaceString.substr(0,3)
+    const yearNumber = convertStringToNumberFunction(yearString)
+    if (yearNumber === 0) {
+        return ''
+    }
+    const replaceString2 = replaceString.replace(yearString, `${yearNumber + 1911}`)
+    return replaceString2
+}
+//147 三信銀行即時資料 - get data
+const getRealTimeResultFromCotaBank = async () => {
+    const url = `https://www.cotabank.com.tw/web/interest_3`
+    const $ = await getDynamicPage$(url)
+    
+    const originalString = $('#UpTime').text().trim()
+    const timeString = parseCotaBankDate(originalString)
+    
+    if (timeString === '') {
+        console.log('拿不到三信銀行即時時間')
+        return undefined
+    }
+    const dateObj = moment(timeString, 'YYYY/MM/DD h:mm')
+    
+    const resultArray = parseRealTimeRateForCotaBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//147 三信銀行即時資料 - parse html
+const parseRealTimeRateForCotaBank = ($, dateObj) => {
+    
+    //const dataTable = $('.tb_Box').find('table')[0]
+    const trs = $('#T1').find('tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        if( i === 0 || i === 1) {
+            return
+        }
+        const dict = {}
+        dict['bankName'] = '三信銀行'
+        dict['bankCode'] = '147'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const sliceName = originCurrencyName.substring(originCurrencyName.length,originCurrencyName.length-3)
+        if (!supportCurrency.currencyArrayOf147.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[1]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[2]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[3]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[4]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    
+    if (resultArray.length != supportCurrency.currencyArrayOf147.length) {
+        return []
+    }
+    return resultArray
+}
+
+
+
+//803 聯邦銀行即時資料 - get data
+const getRealTimeResultFromUBOTBank = async () => {
+    const url = `https://mybank.ubot.com.tw/LoadAP/LoadAP?aptype=IBANK&pageid=IP0907300`
+    const $ = await getBig5Page$(url)
+    // if (timeString === '') {
+    //     console.log('拿不到聯邦銀行即時時間')
+    //     return undefined
+    // }
+    //const dateObj = moment(timeString, 'YYYY年MM月DD日 h:mm')
+    const dateObj = moment()
+    const resultArray = parseRealTimeRateForUBOTBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//803 聯邦銀行即時資料 - parse html
+const parseRealTimeRateForUBOTBank = ($, dateObj) => {
+    const dataTable = $('table')[3]
+    const trs = $(dataTable).find('tr')
+    //寫死拿哪一個table 多一個判斷
+    if (trs.length != 14) {
+        return []
+    }
+    
+    const resultArray = []
+    trs.each((i,tr) => {
+        if( i === 0 || i === 1) {
+            return
+        }
+        const dict = {}
+        dict['bankName'] = '聯邦銀行'
+        dict['bankCode'] = '803'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const sliceName = originCurrencyName.substring(originCurrencyName.length,originCurrencyName.length-3)
+        if (!supportCurrency.currencyArrayOf803.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[1]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[2]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[3]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[4]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    //console.log(resultArray)
+    if (resultArray.length != supportCurrency.currencyArrayOf803.length) {
+        return []
+    }
+    return resultArray
+}
+
+
+//805 遠東銀行即時資料 - get data
+const getRealTimeResultFromFarEastBank = async () => {
+    const url = `http://accessible.feib.com.tw/financialinfo/exchangerate03.aspx`
+    const $ = await getPage$(url)
+    
+    //const timeString = $('.rates-date-datetime').text().trim()
+    // console.log(timeString)
+    // if (timeString === '') {
+    //     console.log('拿不到星展銀行即時時間')
+    //     return undefined
+    // }
+    //const dateObj = moment(timeString, 'YYYY年MM月DD日 h:mm')
+    const dateObj = moment()
+    console.log(dateObj)
+    
+    const resultArray = parseRealTimeRateForFarEastBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+//805 遠東銀行即時資料 - parse html
+const parseRealTimeRateForFarEastBank = ($, dateObj) => {
+    const trs = $('.mainTab').find('tbody tr')
+    const resultArray = []
+    trs.each((i,tr) => {
+        if( i === 0 || i === 14) {
+            return
+        }
+        const dict = {}
+        dict['bankName'] = '遠東銀行'
+        dict['bankCode'] = '805'
+        dict['time'] = dateObj
+        const tds = $(tr).find('td')
+        //拿到貨幣名稱
+        const originCurrencyName = $(tds[0]).text().trim()
+        const sliceName = originCurrencyName.substring(originCurrencyName.length,originCurrencyName.length-3)
+        if (!supportCurrency.currencyArrayOf805.includes(sliceName)) {
+            return
+        }
+        dict['currencyName'] = sliceName
+        //即期買入
+        const spotBuying = $(tds[1]).text().trim()
+        dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+        
+        //即期賣匯
+        const spotSelling = $(tds[2]).text().trim()
+        dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+        
+        //現金買入
+        const cashBuying = $(tds[3]).text().trim()
+        dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+        
+        //現金賣匯
+        const cashSelling = $(tds[4]).text().trim()
+        dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+        resultArray.push(dict)
+    })
+    //console.log(resultArray)
+    if (resultArray.length != supportCurrency.currencyArrayOf805.length) {
+        return []
+    }
+    return resultArray
+}
+
+
 //806 元大銀行 - 民國轉西元
 const parseYuantaBankDate = (str) => {
     const yearString = str.substr(0,3)
@@ -192,7 +934,6 @@ const getRealTimeResultFromYuantaBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-
 //806 元大銀行即時資料 - parse html
 const parseRealTimeRateForYuanTaBank = ($, dateObj) => {
     
@@ -238,7 +979,6 @@ const parseRealTimeRateForYuanTaBank = ($, dateObj) => {
     }
     return resultArray
 }
-
 
 
 //809 凱基銀行即時資料 - get data
@@ -433,9 +1173,6 @@ const parseRealTimeRateForTaishinBank = ($, dateObj) => {
     // }
     return resultArray
 }
-
-
-
 
 //814 大眾銀行即時資料 - get data
 const getRealTimeResultFromTCBank = async () => {
@@ -1202,7 +1939,7 @@ const getRealTimeResultFromSkBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-
+//103 新光銀行即時資料 - parse html
 const pasreRealTimeRateForSkBank = ($, dateObj) => {
     const trs = $('table tbody tr')
     const resultArray = []
@@ -1264,8 +2001,7 @@ const getRealTimeResultFromFubonBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-
-//012 富邦銀行 - parse html
+//012 富邦銀行即時資料 - parse html
 const pasreRealTimeRateForFubonBank = ($, dateObj) => {
     const trs = $('.rate-table').find('tbody tr')
     const resultArray = []
@@ -1346,7 +2082,7 @@ const getRealTimeResultFromChanghuaBank = async () => {
     return {resultTime:dateObj, resultArray:resultArray}
 }
 
-//009 彰化銀行 - parse html
+//009 彰化銀行即時資料 - parse html
 const parseRealTimeRateForChangHuaBank = ($, dateObj) => {
     const trs = $('div table tbody').find('tr')
     if (trs.length !== 20) {
@@ -1666,7 +2402,7 @@ const getRealTimeResultFromHuaNanBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-//008 華南銀行 - parse html
+//008 華南銀行即時資料 - parse html
 const parseRealTimeRateForHuaNanBank = ($, dateObj) => {
     const tables = $('table')
     const targetTable = tables[3]
@@ -2030,7 +2766,7 @@ const getRealTimeResultFromLandBank = async () => {
     const resultDict = {resultTime:dateObj, resultArray:resultArray}
     return resultDict
 }
-//005 土地銀行 - parse html
+//005 土地銀行即時資料 - parse html
 const pasreRealTimeRateForLandBank = ($, dateObj) => {
     const trs = $('.disptab').find('tr')
     console.log(trs.length)
@@ -2168,7 +2904,6 @@ const getRealTimeResultFromEsunBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-
 //808 玉山銀行即時資料 - pasre Html
 const pasreRealTimeRateForEsunBank = ($, dateObj) => {
     const trs = $('.tableContent-light')
@@ -2210,23 +2945,8 @@ const pasreRealTimeRateForEsunBank = ($, dateObj) => {
     return resultArray
 }
 
-//007 第一銀行
-// const getRealTimeResultFromFirstBank = async() => {
-//     const url = `https://www.firstbank.com.tw/servlet/fbweb/ForExRatesInquiry`
-//     const $ = await getDynamicPageForFristBank$(url)
-//     // const $ = await getPage$(url)
-//
-//     // console.log($('h3.tab-title').text())
-//
-//     const test = $('#table1').children().length
-//     console.log(test)
-//     // console.log($(test).text())
-//     return test
-//
-// }
 
-
-//017 兆豐商銀即時資料
+//017 兆豐商銀即時資料 - get data
 const getRealTimeResultFromMegaBank = async () => {
     const url = `https://wwwfile.megabank.com.tw/rates/M001/viewF.asp`
     const $ = await getDynamicPage$(url)
@@ -2247,7 +2967,7 @@ const getRealTimeResultFromMegaBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-
+//017 兆豐商銀即時資料 - pasre Html
 const pasreRealTimeRateForMegaBank = ($, dateObj) => {
     const resultArray = []
     
@@ -2477,6 +3197,36 @@ module.exports.getRealTimeResultFromKgiBank = getRealTimeResultFromKgiBank
 
 //元大銀行 806
 module.exports.getRealTimeResultFromYuantaBank = getRealTimeResultFromYuantaBank
+
+//遠東銀行 805
+module.exports.getRealTimeResultFromFarEastBank = getRealTimeResultFromFarEastBank
+
+//聯邦銀行 803
+module.exports.getRealTimeResultFromUBOTBank = getRealTimeResultFromUBOTBank
+
+//三信銀行 147
+module.exports.getRealTimeResultFromCotaBank = getRealTimeResultFromCotaBank
+
+//板信銀行 118
+module.exports.getRealTimeResultFromBOPBank = getRealTimeResultFromBOPBank
+
+//陽信銀行 108
+module.exports.getRealTimeResultFromSunnyBank = getRealTimeResultFromSunnyBank
+
+//台中銀行 053
+module.exports.getRealTimeResultFromTaichungBank = getRealTimeResultFromTaichungBank
+
+//台灣企銀 050
+module.exports.getRealTimeResultFromTbbBank = getRealTimeResultFromTbbBank
+
+//高雄銀行 016
+module.exports.getRealTimeResultFromKaoHsiungBank = getRealTimeResultFromKaoHsiungBank
+
+//渣打銀行 052
+module.exports.getRealTimeResultFromCharterBank = getRealTimeResultFromCharterBank
+
+//第一銀行 007
+module.exports.getRealTimeResultFromFirstBank = getRealTimeResultFromFirstBank
 
 // const rate = new Rate(dict)
 // Bank.findOne({name:'台灣銀行'}).then()

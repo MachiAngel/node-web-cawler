@@ -38,6 +38,17 @@ const chineseToEnglishDict = {
     '人民幣':'CNY'
 }
 
-const cn = chineseToEnglishDict['人民']
-console.log(cn)
+// const cn = chineseToEnglishDict['人民']
+// console.log(cn)
 
+// const a = '#formpop:datagrid_DataGridBody'
+
+const originCurrencyName = 'abcd(USD)'
+const sliceName = originCurrencyName.slice(4,8)
+// console.log(sliceName)
+
+const a = '查詢日期：2017-12-18 19:46:28 \t \t \t \t 掛牌日期：106/12/18 16:06'
+
+const indexKey = a.indexOf('掛')
+const wannaString = a.slice(indexKey+5,a.length)
+console.log(wannaString)

@@ -1,5 +1,4 @@
-// const cheerio = require('cheerio')
-// const request = require('request')
+
 const path = require('path')
 //model
 const moment = require('moment')
@@ -236,7 +235,6 @@ const refreshEsunBankData = async () => {
     
 }
 
-
 //807 永豐銀行
 const refreshSinopacBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromSinopacBank()
@@ -421,7 +419,6 @@ const refreshFubonBankData = async () => {
     }
     return 'refresh 012 done'
 }
-
 //103 新光銀行
 const refreshSkBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromSkBank()
@@ -458,7 +455,6 @@ const refreshSkBankData = async () => {
     }
     return 'refresh 103 done'
 }
-
 //013 國泰世華
 const refreshCathayBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromCathayBank()
@@ -495,7 +491,6 @@ const refreshCathayBankData = async () => {
     }
     return 'refresh 013 done'
 }
-
 //021 花旗銀行
 const refreshCitiBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromCitiBank()
@@ -532,7 +527,6 @@ const refreshCitiBankData = async () => {
     }
     return 'refresh 021 done'
 }
-
 //081 滙豐銀行
 const refreshHSBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromHSBank()
@@ -569,7 +563,6 @@ const refreshHSBankData = async () => {
     }
     return 'refresh 081 done'
 }
-
 //822 中國信託
 const refreshCTBCBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromCTBCBank()
@@ -606,7 +599,6 @@ const refreshCTBCBankData = async () => {
     }
     return 'refresh 822 done'
 }
-
 //816 安泰銀行
 const refreshEntieBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromEntieBank()
@@ -643,7 +635,6 @@ const refreshEntieBankData = async () => {
     }
     return 'refresh 816 done'
 }
-
 //815 日盛銀行
 const refreshJihSunBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromjihSunBank()
@@ -680,7 +671,6 @@ const refreshJihSunBankData = async () => {
     }
     return 'refresh 815 done'
 }
-
 //814 大眾銀行
 const refreshTCBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromTCBank()
@@ -717,7 +707,6 @@ const refreshTCBankData = async () => {
     }
     return 'refresh 814 done'
 }
-
 //812 台新銀行
 const refreshTaishinBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromTaishinBank()
@@ -754,8 +743,6 @@ const refreshTaishinBankData = async () => {
     }
     return 'refresh 812 done'
 }
-
-
 //810 星展銀行
 const refreshDBSBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromDBSBank()
@@ -792,7 +779,6 @@ const refreshDBSBankData = async () => {
     }
     return 'refresh 810 done'
 }
-
 //809 凱基銀行
 const refreshKgiBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromKgiBank()
@@ -829,7 +815,6 @@ const refreshKgiBankData = async () => {
     }
     return 'refresh 809 done'
 }
-
 //806 元大銀行
 const refreshYuanTaBankData = async () => {
     const resultDict = await cralwer.getRealTimeResultFromYuantaBank()
@@ -1013,6 +998,56 @@ const bankInfoDict = {
         bankCode:'806',
         bankCawler:cralwer.getRealTimeResultFromYuantaBank
     },
+    '805':{
+        bankName:'遠東銀行',
+        bankCode:'805',
+        bankCawler:cralwer.getRealTimeResultFromFarEastBank
+    },
+    '803':{
+        bankName:'聯邦銀行',
+        bankCode:'803',
+        bankCawler:cralwer.getRealTimeResultFromUBOTBank
+    },
+    '147':{
+        bankName:'三信銀行',
+        bankCode:'147',
+        bankCawler:cralwer.getRealTimeResultFromCotaBank
+    },
+    '118':{
+        bankName:'板信銀行',
+        bankCode:'118',
+        bankCawler:cralwer.getRealTimeResultFromBOPBank
+    },
+    '108':{
+        bankName:'陽信銀行',
+        bankCode:'108',
+        bankCawler:cralwer.getRealTimeResultFromSunnyBank
+    },
+    '053':{
+        bankName:'台中銀行',
+        bankCode:'053',
+        bankCawler:cralwer.getRealTimeResultFromTaichungBank
+    },
+    '050':{
+        bankName:'台灣企銀',
+        bankCode:'050',
+        bankCawler:cralwer.getRealTimeResultFromTbbBank
+    },
+    '016':{
+        bankName:'高雄銀行',
+        bankCode:'016',
+        bankCawler:cralwer.getRealTimeResultFromKaoHsiungBank
+    },
+    '052':{
+        bankName:'渣打銀行',
+        bankCode:'052',
+        bankCawler:cralwer.getRealTimeResultFromCharterBank
+    },
+    '007':{
+        bankName:'第一銀行',
+        bankCode:'007',
+        bankCawler:cralwer.getRealTimeResultFromFirstBank
+    }
 }
 
 

@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== 'test') {
         //     console.log(result)
         // })
     
-        getBank('元大銀行', '806').then((result) => {
+        getBank('第一銀行', '007').then((result) => {
             console.log(result)
         })
         

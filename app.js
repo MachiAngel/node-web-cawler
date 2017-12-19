@@ -1,3 +1,5 @@
+const {checkTime} = require('./util/publicfuction')
+const {getCurrentHourTime} = require('./util/publicfuction')
 //先載入DB
 const {mongoose} = require('./db/mongoose.js')
 
@@ -12,6 +14,8 @@ const {refreshBankDataFor} = require('./util/util')
 schedule.scheduleJob('*/3 * * * *', () => {
     console.log('--------開始排程程式碼-----------')
     console.log(new Date())
+    
+    const shouldReFlesh = checkTime()
     
     //#1 004 台灣銀行
     refreshBankDataFor('004')
@@ -90,12 +94,19 @@ schedule.scheduleJob('*/3 * * * *', () => {
     })
     
     //#11 021 花旗銀行
-    refreshBankDataFor('021')
-        .then((result) => {
-            console.log(result)
-        }).catch((e) => {
-        console.log(e)
-    })
+    if (shouldReFlesh) {
+        refreshBankDataFor('021')
+            .then((result) => {
+                const hourString = getCurrentHourTime()
+                console.log(`有更新花旗銀行 現在小時:${hourString}`)
+                console.log(result)
+            }).catch((e) => {
+            console.log(e)
+        })
+    }else {
+        console.log(`沒有更新花旗銀行 現在小時:${hourString}`)
+    }
+    
     
     //#12 081 滙豐銀行
     refreshBankDataFor('081')
@@ -164,6 +175,105 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
+    
+    //#21 805 遠東銀行
+    if (shouldReFlesh) {
+        refreshBankDataFor('805')
+            .then((result) => {
+                const hourString = getCurrentHourTime()
+                console.log(`有更新遠東銀行 現在小時:${hourString}`)
+                console.log(result)
+            }).catch((e) => {
+            console.log(e)
+        })
+    }else {
+        console.log(`沒有更新遠東銀行 現在小時:${hourString}`)
+    }
+    
+    //#22 803 聯邦銀行
+    if (shouldReFlesh) {
+        refreshBankDataFor('803')
+            .then((result) => {
+                const hourString = getCurrentHourTime()
+                console.log(`有更新聯邦銀行 現在小時:${hourString}`)
+                console.log(result)
+            }).catch((e) => {
+            console.log(e)
+        })
+    }else {
+        console.log(`沒有更新聯邦銀行 現在小時:${hourString}`)
+    }
+    
+    
+    //#23 147 三信銀行
+    refreshBankDataFor('803')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
+    //#24 118 板信銀行
+    refreshBankDataFor('118')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
+    //#25 陽信銀行
+    refreshBankDataFor('108')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
+    //#26 053 台中銀行
+    if (shouldReFlesh) {
+        refreshBankDataFor('053')
+            .then((result) => {
+                const hourString = getCurrentHourTime()
+                console.log(`有更新台中銀行 現在小時:${hourString}`)
+                console.log(result)
+            }).catch((e) => {
+            console.log(e)
+        })
+    }else {
+        console.log(`沒有更新台中銀行 現在小時:${hourString}`)
+    }
+    
+    //#27 台灣企銀
+    refreshBankDataFor('050')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
+    //#28 高雄銀行
+    refreshBankDataFor('016')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
+    //#29 渣打銀行
+    refreshBankDataFor('052')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    //#30 第一銀行
+    refreshBankDataFor('007')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
+    
     console.log('--------執行程式碼結束..等待異步-----------')
 })
 

@@ -5,10 +5,12 @@ const chineseToEnglishDict = {
     '美元':'USD',
     '歐元':'EUR',
     '日圓':'JPY',
+    '日幣':'JPY',
     '日元':'JPY',
     '英鎊':'GBP',
     '港幣':'HKD',
     '澳幣':'AUD',
+    '澳洲幣':'AUD',
     '加拿大幣':'CAD',
     '加幣':'CAD',
     '新加坡幣':'SGD',
@@ -16,6 +18,7 @@ const chineseToEnglishDict = {
     '瑞典幣':'SEK',
     '南非幣':'ZAR',
     '泰幣':'THB',
+    '泰銖':'THB',
     '紐西蘭幣':'NZD',
     '紐幣':'NZD',
     '歐元':'EUR',
@@ -383,6 +386,140 @@ const currencyArrayOf806 = [ 'USD',
     'SEK',
     'THB' ]
 
+const currencyArrayOf805 = [ 'USD',
+    'GBP',
+    'HKD',
+    'CHF',
+    'AUD',
+    'SGD',
+    'JPY',
+    'CAD',
+    'THB',
+    'EUR',
+    'NZD',
+    'CNY',
+    'ZAR' ]
+
+const currencyArrayOf803 = [ 'USD',
+    'JPY',
+    'GBP',
+    'AUD',
+    'HKD',
+    'CAD',
+    'CNY',
+    'SGD',
+    'ZAR',
+    'CHF',
+    'NZD',
+    'EUR' ]
+
+const currencyArrayOf147 = ['USD', 'JPY', 'CNY', 'HKD', 'EUR', 'GBP', 'CAD', 'CHF', 'AUD', 'NZD', 'ZAR']
+
+
+const currencyArrayOf118 = [ 'USD',
+    'JPY',
+    'CHF',
+    'HKD',
+    'GBP',
+    'CAD',
+    'SGD',
+    'AUD',
+    'CNY',
+    'ZAR',
+    'NZD',
+    'EUR' ]
+
+const currencyArrayOf108 = [ 'USD',
+    'HKD',
+    'JPY',
+    'SGD',
+    'THB',
+    'NZD',
+    'AUD',
+    'GBP',
+    'CHF',
+    'EUR',
+    'CAD',
+    'CNY',
+    'ZAR' ]
+
+
+const currencyArrayOf053 = [ 'USD',
+    'HKD',
+    'GBP',
+    'AUD',
+    'CAD',
+    'SGD',
+    'CHF',
+    'JPY',
+    'ZAR',
+    'SEK',
+    'NZD',
+    'EUR',
+    'CNY' ]
+
+
+const currencyArrayOf050 = [ 'USD',
+    'AUD',
+    'CAD',
+    'HKD',
+    'GBP',
+    'SGD',
+    'ZAR',
+    'SEK',
+    'CHF',
+    'JPY',
+    'THB',
+    'EUR',
+    'NZD',
+    'CNY' ]
+
+const currencyArrayOf016 = [ 'USD',
+    'GBP',
+    'HKD',
+    'AUD',
+    'SGD',
+    'CHF',
+    'CAD',
+    'JPY',
+    'CNY',
+    'ZAR',
+    'SEK',
+    'KRW',
+    'EUR',
+    'NZD' ]
+
+const currencyArrayOf052 = [ 'USD',
+    'HKD',
+    'GBP',
+    'AUD',
+    'CAD',
+    'SGD',
+    'CHF',
+    'JPY',
+    'THB',
+    'EUR',
+    'NZD',
+    'ZAR',
+    'SEK',
+    'CNY' ]
+
+
+const currencyArrayOf007 = [ 'USD',
+    'GBP',
+    'HKD',
+    'AUD',
+    'SGD',
+    'CHF',
+    'CAD',
+    'JPY',
+    'ZAR',
+    'SEK',
+    'THB',
+    'NZD',
+    'EUR',
+    'CNY',
+    'TRY' ]
 
 // const testName = 'USD'
 // if (currencyArrayOf017.includes(testName)){
@@ -411,7 +548,16 @@ module.exports.currencyArrayOf812 = currencyArrayOf812
 module.exports.currencyArrayOf810 = currencyArrayOf810
 module.exports.currencyArrayOf809 = currencyArrayOf809
 module.exports.currencyArrayOf806 = currencyArrayOf806
-
+module.exports.currencyArrayOf805 = currencyArrayOf805
+module.exports.currencyArrayOf803 = currencyArrayOf803
+module.exports.currencyArrayOf147 = currencyArrayOf147
+module.exports.currencyArrayOf118 = currencyArrayOf118
+module.exports.currencyArrayOf108 = currencyArrayOf108
+module.exports.currencyArrayOf053 = currencyArrayOf053
+module.exports.currencyArrayOf050 = currencyArrayOf050
+module.exports.currencyArrayOf016 = currencyArrayOf016
+module.exports.currencyArrayOf052 = currencyArrayOf052
+module.exports.currencyArrayOf007 = currencyArrayOf007
 
 module.exports.chineseToEnglishDict = chineseToEnglishDict
 
