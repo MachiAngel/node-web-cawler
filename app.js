@@ -14,9 +14,9 @@ const {refreshBankDataFor} = require('./util/util')
 schedule.scheduleJob('*/3 * * * *', () => {
     console.log('--------開始排程程式碼-----------')
     console.log(new Date())
-    
+
     const shouldReFlesh = checkTime()
-    
+
     //#1 004 台灣銀行
     refreshBankDataFor('004')
         .then((result) => {
@@ -45,7 +45,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#5 005 土地銀行
     refreshBankDataFor('005')
         .then((result) => {
@@ -53,7 +53,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#6 008 華南銀行
     refreshBankDataFor('008')
         .then((result) => {
@@ -68,7 +68,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#8 012 富邦銀行
     refreshBankDataFor('012')
         .then((result) => {
@@ -76,7 +76,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#9 103 新光銀行
     refreshBankDataFor('103')
         .then((result) => {
@@ -84,7 +84,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#10 013 國泰世華
     refreshBankDataFor('013')
         .then((result) => {
@@ -92,7 +92,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#11 021 花旗銀行
     if (shouldReFlesh) {
         refreshBankDataFor('021')
@@ -104,10 +104,11 @@ schedule.scheduleJob('*/3 * * * *', () => {
             console.log(e)
         })
     }else {
+        const hourString = getCurrentHourTime()
         console.log(`沒有更新花旗銀行 現在小時:${hourString}`)
     }
-    
-    
+
+
     //#12 081 滙豐銀行
     refreshBankDataFor('081')
         .then((result) => {
@@ -115,7 +116,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#13 822 中國信託
     refreshBankDataFor('822')
         .then((result) => {
@@ -123,7 +124,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#14 816 安泰銀行
     refreshBankDataFor('816')
         .then((result) => {
@@ -131,7 +132,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#15 815 日盛銀行
     refreshBankDataFor('815')
         .then((result) => {
@@ -146,7 +147,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#17 812 台新銀行
     refreshBankDataFor('812')
         .then((result) => {
@@ -175,7 +176,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#21 805 遠東銀行
     if (shouldReFlesh) {
         refreshBankDataFor('805')
@@ -187,9 +188,10 @@ schedule.scheduleJob('*/3 * * * *', () => {
             console.log(e)
         })
     }else {
+        const hourString = getCurrentHourTime()
         console.log(`沒有更新遠東銀行 現在小時:${hourString}`)
     }
-    
+
     //#22 803 聯邦銀行
     if (shouldReFlesh) {
         refreshBankDataFor('803')
@@ -201,10 +203,11 @@ schedule.scheduleJob('*/3 * * * *', () => {
             console.log(e)
         })
     }else {
+        const hourString = getCurrentHourTime()
         console.log(`沒有更新聯邦銀行 現在小時:${hourString}`)
     }
-    
-    
+
+
     //#23 147 三信銀行
     refreshBankDataFor('803')
         .then((result) => {
@@ -212,7 +215,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#24 118 板信銀行
     refreshBankDataFor('118')
         .then((result) => {
@@ -220,7 +223,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#25 陽信銀行
     refreshBankDataFor('108')
         .then((result) => {
@@ -228,7 +231,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#26 053 台中銀行
     if (shouldReFlesh) {
         refreshBankDataFor('053')
@@ -240,9 +243,10 @@ schedule.scheduleJob('*/3 * * * *', () => {
             console.log(e)
         })
     }else {
+        const hourString = getCurrentHourTime()
         console.log(`沒有更新台中銀行 現在小時:${hourString}`)
     }
-    
+
     //#27 台灣企銀
     refreshBankDataFor('050')
         .then((result) => {
@@ -250,7 +254,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#28 高雄銀行
     refreshBankDataFor('016')
         .then((result) => {
@@ -258,7 +262,7 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     //#29 渣打銀行
     refreshBankDataFor('052')
         .then((result) => {
@@ -273,13 +277,6 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
-    
+
     console.log('--------執行程式碼結束..等待異步-----------')
 })
-
-
-
-
-
-
-
