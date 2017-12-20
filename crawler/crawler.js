@@ -168,6 +168,404 @@ const getDynamicPageForFristBank$ = async (url) => {
 }
 
 
+//050 合作金庫即時資料 - 民國轉西元
+const parseCooperativeBankDate = (str) => {
+    //不包含 查詢日期： 查詢時間： 直接treturn
+    if (!(str.includes('查詢日期：') && str.includes('查詢時間：'))) {
+        return ''
+    }
+    
+    const replaceString = str.replace('查詢日期：', '').replace('查詢時間：', '')
+    const yearString = replaceString.substr(0,3)
+    const yearNumber = convertStringToNumberFunction(yearString)
+    if (yearNumber === 0) {
+        return ''
+    }
+    const replaceString2 = replaceString.replace(yearString, `${yearNumber + 1911}`)
+    return replaceString2
+}
+
+//006 合作金庫即時資料 - get data
+const getRealTimeResultFromCooperativeBank = async () => {
+    const url = `https://www.tcb-bank.com.tw/finance_info/Pages/foreign_spot_rate.aspx`
+    const $ = await getPage$(url)
+    
+    const timeString = $('#ctl00_PlaceHolderEmptyMain_PlaceHolderMain_fecurrentid_lblDate').text().trim()
+    console.log(timeString)
+    if (timeString === '') {
+        console.log('拿不到合作金庫即時時間')
+        return undefined
+    }
+    const latestDateString = parseCooperativeBankDate(timeString)
+    if (latestDateString === ''){
+        return undefined
+    }
+    
+    const dateObj = moment(latestDateString, 'YYYY/MM/DD h:mm')
+    console.log(dateObj)
+
+    const resultArray = parseRealTimeRateForCooperativeBank($, dateObj)
+    if (resultArray.length === 0) {
+        return undefined
+    }
+    return {resultTime:dateObj, resultArray:resultArray}
+}
+
+
+//006 合作金庫即時資料 - parse html
+const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
+    const trs = $('#ctl00_PlaceHolderEmptyMain_PlaceHolderMain_fecurrentid_gvResult').find('tr')
+    
+    if (trs.length !== 29) {
+        return []
+    }
+    const resultArray = []
+    
+    var dict = {}
+    
+    trs.each((i,tr) => {
+        dict['bankName'] = '合作金庫'
+        dict['bankCode'] = '006'
+        dict['time'] = dateObj
+        if (i === 0 ) {
+            return
+        }
+        const tds = $(tr).find('td')
+        //美金
+        if (i === 1 || i === 2) {
+            dict['currencyName'] = 'USD'
+            if (i === 1) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+                
+            }
+            if (i === 2) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 3 || i === 4) {
+            dict['currencyName'] = 'HKD'
+            if (i === 3) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 4) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 5 || i === 6) {
+            dict['currencyName'] = 'GBP'
+            if (i === 5) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 6) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 7 || i === 8) {
+            dict['currencyName'] = 'AUD'
+            if (i === 7) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 8) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 9 || i === 10) {
+            dict['currencyName'] = 'SGD'
+            if (i === 9) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 10) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 11 || i === 12) {
+            dict['currencyName'] = 'CHF'
+            if (i === 11) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 12) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 13 || i === 14) {
+            dict['currencyName'] = 'CAD'
+            if (i === 13) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 14) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 15 || i === 16) {
+            dict['currencyName'] = 'JPY'
+            if (i === 15) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 16) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 17 || i === 18) {
+            dict['currencyName'] = 'SEK'
+            if (i === 17) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 18) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 19 || i === 20) {
+            dict['currencyName'] = 'EUR'
+            if (i === 19) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 20) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 21 || i === 22) {
+            dict['currencyName'] = 'NZD'
+            if (i === 21) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 22) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+    
+        if (i === 23 || i === 24) {
+            dict['currencyName'] = 'THB'
+            if (i === 23) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 24) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 25 || i === 26) {
+            dict['currencyName'] = 'ZAR'
+            if (i === 25) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 26) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        if (i === 27 || i === 28) {
+            dict['currencyName'] = 'CNY'
+            if (i === 27) {
+                //即期買入
+                const spotBuying = $(tds[2]).text()
+                dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
+                //現金買入
+                const cashBuying = $(tds[3]).text()
+                dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
+            
+            }
+            if (i === 28) {
+                //即期賣匯
+                const spotSelling = $(tds[2]).text()
+                dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
+                //現金賣匯
+                const cashSelling = $(tds[3]).text()
+                dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
+                resultArray.push(dict)
+                dict = {}
+                return
+            }
+        }
+        
+        
+    })
+    
+    if (resultArray.length != supportCurrency.currencyArrayOf009.length) {
+        return []
+    }
+    return resultArray
+}
+
+// getRealTimeResultFromCooperativeBank()
 
 //007 第一銀行即時資料 - get data
 const getRealTimeResultFromFirstBank = async () => {
