@@ -277,6 +277,14 @@ schedule.scheduleJob('*/3 * * * *', () => {
         }).catch((e) => {
         console.log(e)
     })
+    
+    //#31 合作金庫
+    refreshBankDataFor('006')
+        .then((result) => {
+            console.log(result)
+        }).catch((e) => {
+        console.log(e)
+    })
 
     console.log('--------執行程式碼結束..等待異步-----------')
 })

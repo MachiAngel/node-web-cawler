@@ -2419,6 +2419,10 @@ const pasreRealTimeRateForFubonBank = ($, dateObj) => {
     return resultArray
 }
 
+
+
+
+
 //009 彰化銀行即時資料 - get data
 const getRealTimeResultFromChanghuaBank = async () => {
     const url = `https://www.bankchb.com/chb_accessibility/G0100.jsp`
@@ -2444,7 +2448,6 @@ const getRealTimeResultFromChanghuaBank = async () => {
     }
     return {resultTime:dateObj, resultArray:resultArray}
 }
-
 //009 彰化銀行即時資料 - parse html
 const parseRealTimeRateForChangHuaBank = ($, dateObj) => {
     const trs = $('div table tbody').find('tr')
