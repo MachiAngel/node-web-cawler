@@ -122,7 +122,6 @@ const getDynamicPage$ = async (url,proxy) => {
         await lateTime(3000)
         //獲取網頁
         const content = await page.property('content')
-        console.log(content)
         //page.render('bank.jpeg', {format: 'jpeg', quality: '100'})//
         await instance.exit()
         const $ = cheerio.load(content)
@@ -156,7 +155,6 @@ const getRealTimeResultFromCooperativeBank = async () => {
     const $ = await getPage$(url)
     
     const timeString = $('#ctl00_PlaceHolderEmptyMain_PlaceHolderMain_fecurrentid_lblDate').text().trim()
-    console.log(timeString)
     if (timeString === '') {
         console.log('拿不到合作金庫即時時間')
         return undefined
@@ -167,7 +165,7 @@ const getRealTimeResultFromCooperativeBank = async () => {
     }
     
     const dateObj = moment(latestDateString, 'YYYY/MM/DD h:mm')
-    console.log(dateObj)
+    
 
     const resultArray = parseRealTimeRateForCooperativeBank($, dateObj)
     if (resultArray.length === 0) {
