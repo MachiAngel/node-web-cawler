@@ -2,23 +2,32 @@ const moment = require("moment")
 const tz = require("moment-timezone")
 
 
-// const now1 = moment('2017/12/19 00:13','YYYY/MM/DD h:mm')
 
-const shouldReflesh = () => {
-    const nowMoment = moment()
-    const nowHour = nowMoment.tz('Asia/Taipei').format('H')
-    // var re = /(^[0-9]([.][0-9]{1,2})?$)|(^1[0-9]([.][0-9]{1,2})?$)|(^2[0-3]([.][0-9]{1,2})?$)|(^24([.]0{1,2})?$)/;
-    
-    
-    if (nowHour > 7 && nowHour < 21) {
-        return true
-    }else {
-        return false
-    }
+const saySomthing = (name,word) => {
+    console.log(name)
+    console.log(word)
 }
 
-const should = shouldReflesh()
-console.log(should)
+saySomthing('angel')
+
+
+// const now1 = moment('2017/12/19 00:13','YYYY/MM/DD h:mm')
+
+// const shouldReflesh = () => {
+//     const nowMoment = moment()
+//     const nowHour = nowMoment.tz('Asia/Taipei').format('H')
+//     // var re = /(^[0-9]([.][0-9]{1,2})?$)|(^1[0-9]([.][0-9]{1,2})?$)|(^2[0-3]([.][0-9]{1,2})?$)|(^24([.]0{1,2})?$)/;
+//
+//
+//     if (nowHour > 7 && nowHour < 21) {
+//         return true
+//     }else {
+//         return false
+//     }
+// }
+//
+// const should = shouldReflesh()
+// console.log(should)
 
 
 

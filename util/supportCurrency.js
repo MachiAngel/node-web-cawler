@@ -521,6 +521,21 @@ const currencyArrayOf007 = [ 'USD',
     'CNY',
     'TRY' ]
 
+const currencyArrayOf006 = [ 'USD',
+    'HKD',
+    'GBP',
+    'AUD',
+    'SGD',
+    'CHF',
+    'CAD',
+    'JPY',
+    'SEK',
+    'EUR',
+    'NZD',
+    'THB',
+    'ZAR',
+    'CNY' ]
+
 // const testName = 'USD'
 // if (currencyArrayOf017.includes(testName)){
 //     console.log('yes')
@@ -558,6 +573,7 @@ module.exports.currencyArrayOf050 = currencyArrayOf050
 module.exports.currencyArrayOf016 = currencyArrayOf016
 module.exports.currencyArrayOf052 = currencyArrayOf052
 module.exports.currencyArrayOf007 = currencyArrayOf007
+module.exports.currencyArrayOf006 = currencyArrayOf006
 
 module.exports.chineseToEnglishDict = chineseToEnglishDict
 

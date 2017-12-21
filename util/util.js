@@ -1047,6 +1047,11 @@ const bankInfoDict = {
         bankName:'第一銀行',
         bankCode:'007',
         bankCawler:cralwer.getRealTimeResultFromFirstBank
+    },
+    '006':{
+        bankName:'合作金庫',
+        bankCode:'006',
+        bankCawler:cralwer.getRealTimeResultFromCooperativeBank
     }
 }
 

@@ -410,7 +410,7 @@ describe('即時匯率API Test',() => {
     })
     
     //#30 第一銀行
-    it.only('會下載第一銀行最新匯率15種幣別資料', async () => {
+    it('會下載第一銀行最新匯率15種幣別資料', async () => {
         
         const resultDict = await cralwer.getRealTimeResultFromFirstBank()
         expect(resultDict.resultArray.length).toBe(15)
@@ -421,6 +421,20 @@ describe('即時匯率API Test',() => {
         })
         
         expect(filtedArrayOfHaveCashTrade.length).toBe(8)
+    })
+    
+    //#31 合作金庫
+    it.only('會下載合作金庫最新匯率14種幣別資料', async () => {
+        
+        const resultDict = await cralwer.getRealTimeResultFromCooperativeBank()
+        expect(resultDict.resultArray.length).toBe(14)
+        
+        //提供現金買賣 幣別資料應該要有6個
+        const filtedArrayOfHaveCashTrade = resultDict.resultArray.filter((result) => {
+            return (result.cashBuying !== 0 && result.cashSelling !== 0)
+        })
+        
+        expect(filtedArrayOfHaveCashTrade.length).toBe(6)
     })
     
 })

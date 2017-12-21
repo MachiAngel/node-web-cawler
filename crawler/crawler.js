@@ -4,9 +4,10 @@ const axios = require('axios')
 const phantom = require('phantom')
 const request = require('request')
 const iconv = require('iconv-lite')
-// require('ssl-root-cas').inject()
-// const Bank = require('../model/bank.js')
-// const Rate = require('../model/rate.js')
+
+
+// '211.21.120.163', '8080'
+
 const supportCurrency = require('../util/supportCurrency')
 const {convertStringToNumberFunction} = require('../util/publicfuction')
 
@@ -99,20 +100,19 @@ const getBig5Page$ = async (url) => {
     }
 }
 
-const getDynamicPage$ = async (url) => {
+const getDynamicPage$ = async (url,proxy) => {
     //取得instance
     const instance = await phantom.create()
     try{
         const page = await instance.createPage()
-        //page.viewportSize = { width: 1920, height: 1080 }
-        //page.setting('resourceTimeout',40000)
-        // await page.on('onResourceRequested', true,function(requestData, networkRequest) {
-        //     console.info('Requesting', requestData.url);
-        //     if (requestData.url === 'https://ipost.post.gov.tw/pst/home.html') {
-        //         networkRequest.abort()
-        //         console.log('有近來')
-        //     }
-        // })
+        // page.setting('resourceTimeout',50000)
+        await page.on('onResourceTimeout', function(requestData) {
+            console.info('Requesting', requestData);
+        })
+        if (proxy !== undefined) {
+            console.log(`網址:${url} 使用proxy:${proxy}`)
+            page.setProxy(proxy)
+        }
         //打開網頁
         const status = await page.open(url)
         if (status !== 'success') {
@@ -122,7 +122,7 @@ const getDynamicPage$ = async (url) => {
         await lateTime(3000)
         //獲取網頁
         const content = await page.property('content')
-        //console.log(content)
+        console.log(content)
         //page.render('bank.jpeg', {format: 'jpeg', quality: '100'})//
         await instance.exit()
         const $ = cheerio.load(content)
@@ -132,41 +132,6 @@ const getDynamicPage$ = async (url) => {
         throw new Error(`can not get $ from ${url}`)
     }
 }
-const getDynamicPageForFristBank$ = async (url) => {
-    try{
-        //取得instance
-        const instance = await phantom.create()
-        const page = await instance.createPage()
-        //page.viewportSize = { width: 1920, height: 1080 }
-        //打開網頁
-        const status = await page.open(url)
-        if (status !== 'success') {
-            throw new Error()
-        }
-        //等待3秒 html的js才會加載完畢
-        await lateTime(2000)
-        //獲取網頁
-        const content = await page.property('content')
-        console.log(content)
-        // waitUntil(function() {
-        //     return page.evaluate(function() {
-        //         return document.querySelectorAll('tr').length > 1
-        //     })
-        // }).then(function(){
-        //     console.log(content)
-        //
-        // })
-        // console.log('finish')
-        await instance.exit()
-        const $ = cheerio.load(content)
-        return $
-        
-    }catch (e){
-        await instance.exit()
-        throw new Error(`can not get $ from ${url}`)
-    }
-}
-
 
 //050 合作金庫即時資料 - 民國轉西元
 const parseCooperativeBankDate = (str) => {
@@ -211,12 +176,12 @@ const getRealTimeResultFromCooperativeBank = async () => {
     return {resultTime:dateObj, resultArray:resultArray}
 }
 
-
 //006 合作金庫即時資料 - parse html
 const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
     const trs = $('#ctl00_PlaceHolderEmptyMain_PlaceHolderMain_fecurrentid_gvResult').find('tr')
     
     if (trs.length !== 29) {
+        console.log('合作金庫 tr數量不是29個')
         return []
     }
     const resultArray = []
@@ -236,19 +201,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'USD'
             if (i === 1) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
                 
             }
             if (i === 2) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -259,19 +224,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'HKD'
             if (i === 3) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 4) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -282,19 +247,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'GBP'
             if (i === 5) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 6) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -305,19 +270,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'AUD'
             if (i === 7) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 8) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -328,19 +293,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'SGD'
             if (i === 9) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 10) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -351,19 +316,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'CHF'
             if (i === 11) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 12) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -374,19 +339,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'CAD'
             if (i === 13) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 14) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -397,19 +362,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'JPY'
             if (i === 15) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 16) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -420,19 +385,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'SEK'
             if (i === 17) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 18) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -443,19 +408,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'EUR'
             if (i === 19) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 20) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -466,19 +431,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'NZD'
             if (i === 21) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 22) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -490,19 +455,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'THB'
             if (i === 23) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 24) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -513,19 +478,19 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'ZAR'
             if (i === 25) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 26) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
@@ -536,30 +501,28 @@ const parseRealTimeRateForCooperativeBank = ($, dateObj) => {
             dict['currencyName'] = 'CNY'
             if (i === 27) {
                 //即期買入
-                const spotBuying = $(tds[2]).text()
+                const spotBuying = $(tds[2]).text().trim()
                 dict['spotBuying'] = convertStringToNumberFunction(spotBuying)
                 //現金買入
-                const cashBuying = $(tds[3]).text()
+                const cashBuying = $(tds[3]).text().trim()
                 dict['cashBuying'] = convertStringToNumberFunction(cashBuying)
             
             }
             if (i === 28) {
                 //即期賣匯
-                const spotSelling = $(tds[2]).text()
+                const spotSelling = $(tds[2]).text().trim()
                 dict['spotSelling'] = convertStringToNumberFunction(spotSelling)
                 //現金賣匯
-                const cashSelling = $(tds[3]).text()
+                const cashSelling = $(tds[3]).text().trim()
                 dict['cashSelling'] = convertStringToNumberFunction(cashSelling)
                 resultArray.push(dict)
                 dict = {}
                 return
             }
         }
-        
-        
     })
     
-    if (resultArray.length != supportCurrency.currencyArrayOf009.length) {
+    if (resultArray.length != supportCurrency.currencyArrayOf006.length) {
         return []
     }
     return resultArray
@@ -1798,7 +1761,7 @@ const parseRealTimeRateForEntieBank = ($, dateObj) => {
 //822 中國信託即時資料 - get data
 const getRealTimeResultFromCTBCBank = async () => {
     const url = `https://www.ctbcbank.com/CTCBPortalWeb/toPage?id=TW_RB_CM_ebank_018001`
-    const $ = await getDynamicPage$(url)
+    const $ = await getDynamicPage$(url,'http://211.21.120.163:8080')
     
     const timeTable = $('#pageForm').find('table').first()
     const timeString = $(timeTable).find('tr').last().text().trim()
@@ -1859,6 +1822,10 @@ const pasreRealTimeRateForCTBCBank = ($, dateObj) => {
     }
     return resultArray
 }
+
+// getRealTimeResultFromCTBCBank().catch((e) => {
+//     console.log(e.message)
+// })
 
 //081 滙豐銀行即時資料 - get data
 const getRealTimeResultFromHSBank = async () => {
@@ -3625,6 +3592,9 @@ module.exports.getRealTimeResultFromCharterBank = getRealTimeResultFromCharterBa
 
 //第一銀行 007
 module.exports.getRealTimeResultFromFirstBank = getRealTimeResultFromFirstBank
+
+//合作金庫 006
+module.exports.getRealTimeResultFromCooperativeBank = getRealTimeResultFromCooperativeBank
 
 // const rate = new Rate(dict)
 // Bank.findOne({name:'台灣銀行'}).then()
