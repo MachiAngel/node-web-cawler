@@ -19,17 +19,14 @@ const lateTime = async (time) => {
 var count = 10
 const work = () => {
     if (count <= 0) {
+        console.log('cancel')
         j.cancel()
     }
-    console.log('--------開始排程程式碼-----------')
-    console.log(new Date())
-    lateTime(20000)
-        .then((result) => {
-            console.log('ha',count)
-            console.log(result)
-        })
-    
-    console.log('--------結束排程程式碼-----------')
+    if (count <= 5) {
+        count -= 1
+        return
+    }
+    console.log(count)
     count -= 1
 }
 //每x秒
